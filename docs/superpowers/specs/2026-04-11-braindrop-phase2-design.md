@@ -1,7 +1,7 @@
 # BrainDrop — Phase 2 Design (Media Support)
 
 **Data:** 2026-04-11
-**Scope:** Phase 2 — Instagram (instaloader + DeepSeek Vision OCR), foto Telegram, voice note (Groq Whisper), YouTube. Summary in italiano. Coordinator Agno invariato.
+**Scope:** Phase 2 — Instagram (instaloader + DeepSeek Vision OCR), foto Telegram, voice note (OpenAI Whisper), YouTube. Summary in italiano. Coordinator Agno invariato.
 **Fasi successive:** Phase 3 (admin panel), Phase 4 (frontend pubblico), Phase 5 (semantic search).
 
 ---
@@ -55,7 +55,7 @@ braindrop/
 
 ```env
 # Aggiunto in Phase 2
-GROQ_API_KEY=             # Whisper per voice note (groq.com — gratuito)
+OPENAI_API_KEY=           # Whisper per voice note (platform.openai.com)
 
 # Invariate da Phase 1
 TELEGRAM_BOT_TOKEN=
@@ -69,6 +69,8 @@ AGENT_TIMEOUT_SECONDS=60
 ```
 
 `INSTALOADER_SESSION_FILE` è opzionale: se impostato, instaloader usa una sessione autenticata (utile per account semi-privati). Non necessario per account pubblici.
+
+`OPENAI_API_KEY` è usato esclusivamente per Whisper (trascrizione voice note). Non viene usato per enrichment o OCR (tutto su DeepSeek).
 
 ---
 
@@ -142,18 +144,17 @@ POST https://api.deepseek.com/v1/chat/completions
 
 ### Dipendenze
 ```
-groq>=0.5.0
+openai>=1.0.0
 ```
 
 ### Flusso
 1. Riceve `file_path` (file `.ogg` scaricato da Telegram)
-2. Invia a **Groq Whisper** (`whisper-large-v3-turbo`):
+2. Invia a **OpenAI Whisper** (`whisper-1`):
    ```python
-   client = Groq(api_key=settings.GROQ_API_KEY.get_secret_value())
+   client = OpenAI(api_key=settings.OPENAI_API_KEY.get_secret_value())
    transcription = client.audio.transcriptions.create(
        file=open(file_path, "rb"),
-       model="whisper-large-v3-turbo",
-       language="it",   # italiano di default, Whisper rileva comunque auto
+       model="whisper-1",
    )
    ```
 3. Ritorna la trascrizione testuale
@@ -163,7 +164,7 @@ groq>=0.5.0
 | Scenario | Comportamento |
 |---|---|
 | File troppo grande (>25MB) | Ritorna `None` → fallback `save_raw` |
-| Groq non raggiungibile | Eccezione → fallback `save_raw` |
+| OpenAI non raggiungibile | Eccezione → fallback `save_raw` |
 
 ---
 
