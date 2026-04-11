@@ -72,5 +72,7 @@ def test_openai_api_key_required(monkeypatch):
         monkeypatch.setenv(var, "fake")
     monkeypatch.setenv("AUTHORIZED_USER_ID", "1")
     # OPENAI_API_KEY deliberately not set
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValidationError) as exc_info:
         Settings(_env_file=None)
+    missing_fields = [e["loc"] for e in exc_info.value.errors()]
+    assert ("OPENAI_API_KEY",) in missing_fields
