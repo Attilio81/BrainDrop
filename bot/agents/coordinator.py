@@ -3,7 +3,6 @@ from agno.models.deepseek import DeepSeek
 from agno.tools.tavily import TavilyTools
 
 from bot.agents.tools import scrape_url
-from bot.config import get_settings
 from db.models import EnrichedIdea
 
 SYSTEM_PROMPT = """You are a personal knowledge assistant. You receive raw text or URLs
@@ -14,6 +13,7 @@ For each input:
 2. If it's plain text, search Tavily to find what it refers to and enrich it.
 3. Produce a concise English title (max 10 words), a 2-3 sentence English summary explaining
    what it is and why it's interesting, a category from the allowed list, and up to 5 lowercase tags.
+4. Set source_type to "url" if the input was a URL (starts with http:// or https://), or "text" if it was plain text.
 
 Categories: tech, programming, ai, crossfit, travel, food, business, personal, other
 Tags: lowercase, max 5, specific (prefer "llm" over "ai", "react" over "javascript")"""
@@ -21,7 +21,6 @@ Tags: lowercase, max 5, specific (prefer "llm" over "ai", "react" over "javascri
 
 class Coordinator:
     def __init__(self) -> None:
-        settings = get_settings()
         self._agent = Agent(
             model=DeepSeek(id="deepseek-reasoner"),
             tools=[
@@ -34,4 +33,6 @@ class Coordinator:
 
     async def process(self, text: str) -> EnrichedIdea:
         response = await self._agent.arun(text)
+        if not isinstance(response.content, EnrichedIdea):
+            raise ValueError(f"Agent returned unexpected output: {response.content!r}")
         return response.content

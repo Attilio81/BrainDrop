@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from db.models import EnrichedIdea
+from bot.agents.coordinator import Coordinator
 
 
 @pytest.fixture
@@ -32,7 +33,6 @@ async def test_coordinator_returns_enriched_idea(mock_settings):
         instance.arun = AsyncMock(return_value=fake_response)
         MockAgent.return_value = instance
 
-        from bot.agents.coordinator import Coordinator
         coord = Coordinator()
         result = await coord.process("https://example.com")
 
