@@ -1,35 +1,59 @@
-# BrainDrop
+# 🧠 BrainDrop
 
-Personal knowledge capture system via Telegram. Send a link, text, Instagram post, photo, voice note, or YouTube URL — BrainDrop enriches it with AI and saves it to your personal knowledge base.
+> **Cattura tutto. Dimentica niente.**
 
-## What it does
+BrainDrop è il tuo secondo cervello personale via Telegram. Mandi un link, un post Instagram, una foto, una nota vocale o un'idea — lui la analizza, la arricchisce con AI e la salva nella tua knowledge base.
 
-| Input | What happens |
+---
+
+## ✨ Come funziona
+
+```
+Tu mandi qualcosa su Telegram
+        ↓
+BrainDrop estrae il contenuto
+        ↓
+DeepSeek R1 analizza e arricchisce
+        ↓
+Salvato in Supabase, pronto da consultare
+```
+
+---
+
+## 📥 Cosa puoi mandare
+
+| Input | Cosa succede |
 |---|---|
-| URL | Scrapes the page (Firecrawl) + Tavily context → structured entry |
-| Plain text | Tavily enrichment → structured entry |
-| Instagram URL | Downloads post via instaloader, OCR on each slide (GPT-4o-mini) → structured entry |
-| Telegram photo | GPT-4o-mini Vision description/OCR → structured entry |
-| Voice note | OpenAI Whisper transcription → structured entry |
-| YouTube URL | yt-dlp metadata + transcript → structured entry |
+| 🔗 **URL / articolo** | Scraping (Firecrawl) + contesto (Tavily) → entry strutturata |
+| 📸 **Post Instagram** | Caption + OCR di ogni slide del carosello (GPT-4o-mini) → testo completo |
+| ▶️ **Video YouTube** | Metadati + trascrizione automatica → riassunto |
+| 🖼 **Foto Telegram** | Descrizione visiva + OCR (GPT-4o-mini) → testo |
+| 🎙 **Nota vocale** | Trascrizione (OpenAI Whisper) → testo |
+| 💬 **Testo libero** | Ricerca Tavily per contesto → entry arricchita |
 
-Every entry gets: English title, Italian summary, category, tags, source URL, thumbnail. Stored in Supabase.
+Ogni entry riceve: **titolo in inglese**, **riassunto narrativo in italiano**, **categoria**, **tag**, **URL sorgente**.
 
-## Architecture
+---
 
-```
-Telegram bot (python-telegram-bot)
-    ↓
-Media extractors (instagram / photo / voice / youtube)
-    ↓
-Agno coordinator (DeepSeek R1 + Tavily + Firecrawl)
-    ↓
-Supabase (PostgreSQL + RLS)
-```
+## 🤖 Stack tecnico
 
-## Setup
+| Layer | Tecnologia |
+|---|---|
+| Bot | python-telegram-bot |
+| Reasoning | DeepSeek R1 via Agno |
+| Web search | Tavily |
+| Web scraping | Firecrawl |
+| Vision / OCR | GPT-4o-mini (OpenAI) |
+| Voice | Whisper (OpenAI) |
+| Instagram | instaloader |
+| YouTube | yt-dlp + youtube-transcript-api |
+| Database | Supabase (PostgreSQL + RLS) |
 
-### 1. Clone and install
+---
+
+## 🚀 Setup
+
+### 1. Clona e installa
 
 ```bash
 git clone https://github.com/Attilio81/BrainDrop.git
@@ -37,88 +61,92 @@ cd BrainDrop
 pip install -r requirements.txt
 ```
 
-### 2. Environment variables
-
-Copy `.env.example` to `.env` and fill in all values:
+### 2. Variabili d'ambiente
 
 ```bash
 cp .env.example .env
+# Apri .env e compila tutti i valori
 ```
 
-| Variable | Where to get it |
+| Variabile | Dove trovarla |
 |---|---|
-| `TELEGRAM_BOT_TOKEN` | [@BotFather](https://t.me/BotFather) on Telegram |
-| `AUTHORIZED_USER_ID` | Your Telegram user ID (send `/start` to [@userinfobot](https://t.me/userinfobot)) |
+| `TELEGRAM_BOT_TOKEN` | [@BotFather](https://t.me/BotFather) |
+| `AUTHORIZED_USER_ID` | Il tuo ID Telegram → [@userinfobot](https://t.me/userinfobot) |
 | `DEEPSEEK_API_KEY` | [platform.deepseek.com](https://platform.deepseek.com) |
 | `TAVILY_API_KEY` | [app.tavily.com](https://app.tavily.com) |
 | `FIRECRAWL_API_KEY` | [firecrawl.dev](https://firecrawl.dev) |
-| `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com) — used for Whisper (voice) and GPT-4o-mini (OCR) |
-| `SUPABASE_URL` | Supabase project Settings → API |
-| `SUPABASE_SERVICE_KEY` | Supabase project Settings → API → service_role key |
+| `OPENAI_API_KEY` | [platform.openai.com](https://platform.openai.com) — Whisper + Vision OCR |
+| `SUPABASE_URL` | Supabase → Settings → API |
+| `SUPABASE_SERVICE_KEY` | Supabase → Settings → API → `service_role` |
 
-### 3. Supabase — run migrations
+### 3. Supabase — esegui le migrazioni
 
-In **Supabase Dashboard → SQL Editor**, run in order:
+In **Supabase Dashboard → SQL Editor**, esegui in ordine:
 
-1. `db/migrations/001_initial.sql` — creates the `ideas` table
-2. `db/migrations/002_phase2.sql` — updates the `source_type` constraint (no-op if running fresh)
+```sql
+-- 1. Crea la tabella ideas
+-- (incolla il contenuto di db/migrations/001_initial.sql)
 
-### 4. Run the bot
+-- 2. Aggiorna il vincolo source_type
+-- (incolla il contenuto di db/migrations/002_phase2.sql)
+```
 
+### 4. Avvia il bot
+
+**Windows:** doppio click su `start.bat`
+
+**Terminale:**
 ```bash
 python -m bot.main
 ```
 
-## Telegram commands
+---
 
-| Command | Description |
+## 💬 Comandi Telegram
+
+| Comando | Descrizione |
 |---|---|
-| `/start` | Welcome message |
-| `/list` | Last 10 saved entries |
-| `/publish_<id>` | Toggle publish/hide an entry |
-| `/delete_<id>` | Soft-delete an entry |
+| `/start` | Mostra il messaggio di benvenuto |
+| `/list` | Ultimi 10 elementi salvati |
+| `/publish_<id>` | Pubblica o nascondi un elemento |
+| `/delete_<id>` | Elimina (soft delete) |
+| `/clear` | 🗑 Svuota tutto il database |
 
-Send any message (text, URL, Instagram link, YouTube link, photo, voice note) and the bot processes it automatically.
+---
 
-## Project structure
+## 🗂 Struttura del progetto
 
 ```
-braindrop/
+BrainDrop/
 ├── bot/
 │   ├── agents/
-│   │   ├── coordinator.py    # Agno agent (DeepSeek R1 + Tavily + Firecrawl)
+│   │   ├── coordinator.py    # Agno agent — DeepSeek R1 + Tavily + Firecrawl
 │   │   ├── instagram.py      # instaloader + GPT-4o-mini OCR
 │   │   ├── photo.py          # GPT-4o-mini Vision
 │   │   ├── voice.py          # OpenAI Whisper
-│   │   ├── youtube.py        # yt-dlp + youtube-transcript-api
-│   │   └── tools.py          # Firecrawl scrape_url tool
-│   ├── handlers.py           # Telegram message handlers
-│   ├── config.py             # pydantic-settings
+│   │   ├── youtube.py        # yt-dlp + trascrizioni
+│   │   └── tools.py          # Firecrawl tool per Agno
+│   ├── handlers.py           # Handler Telegram
+│   ├── config.py             # Configurazione (pydantic-settings)
 │   └── main.py               # Entry point
 ├── db/
-│   ├── client.py             # Supabase async wrapper
-│   ├── models.py             # Pydantic models
+│   ├── client.py             # Wrapper Supabase async
+│   ├── models.py             # Modelli Pydantic
 │   └── migrations/
-│       ├── 001_initial.sql
-│       └── 002_phase2.sql
-├── tests/                    # 36 tests, all passing
+│       ├── 001_initial.sql   # Schema iniziale
+│       └── 002_phase2.sql    # Aggiornamento source_type
+├── tests/                    # 36 test, tutti in verde ✅
+├── start.bat                 # Avvio rapido Windows
 ├── .env.example
-├── Dockerfile
-└── requirements.txt
+└── Dockerfile
 ```
 
-## Running tests
+---
 
-```bash
-python -m pytest -v
-```
+## 🛣 Roadmap
 
-36 tests, no external API calls (all mocked).
-
-## Roadmap
-
-- **Phase 1** ✅ — Text, URLs, Telegram bot, Supabase
-- **Phase 2** ✅ — Instagram, photos, voice notes, YouTube, Italian summaries
-- **Phase 3** — Admin panel
-- **Phase 4** — Public frontend
-- **Phase 5** — Semantic search (pgvector)
+- ✅ **Phase 1** — Testo, URL, bot Telegram, Supabase
+- ✅ **Phase 2** — Instagram, foto, note vocali, YouTube, riassunti in italiano
+- ⬜ **Phase 3** — Admin panel
+- ⬜ **Phase 4** — Frontend pubblico
+- ⬜ **Phase 5** — Ricerca semantica (pgvector)
