@@ -60,6 +60,9 @@ async def _save_and_reply(
             coordinator.process(raw_text),
             timeout=get_settings().AGENT_TIMEOUT_SECONDS,
         )
+        enrichment_data = {}
+        if raw_text != original_text:
+            enrichment_data["extracted_text"] = raw_text
         idea_create = IdeaCreate(
             title=enriched.title,
             summary=enriched.summary,
@@ -69,6 +72,7 @@ async def _save_and_reply(
             tags=enriched.tags,
             source_url=source_url or enriched.source_url,
             thumbnail_url=thumbnail_url or enriched.thumbnail_url,
+            enrichment_data=enrichment_data,
         )
         saved = await db.save_idea(idea_create)
         short_id = str(saved.id)[:8]
