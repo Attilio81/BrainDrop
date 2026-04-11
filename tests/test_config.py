@@ -25,6 +25,7 @@ def test_config_defaults(monkeypatch):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "fake_deepseek")
     monkeypatch.setenv("TAVILY_API_KEY", "fake_tavily")
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fake_firecrawl")
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-openai")
     monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_KEY", "fake_service_key")
     s = Settings(_env_file=None)
@@ -39,6 +40,7 @@ def test_get_settings_returns_singleton(monkeypatch):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "fake_deepseek")
     monkeypatch.setenv("TAVILY_API_KEY", "fake_tavily")
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fake_firecrawl")
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-openai")
     monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_KEY", "fake_service_key")
     s1 = get_settings()
@@ -53,9 +55,22 @@ def test_secret_fields_not_exposed_in_repr(monkeypatch):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "sk-secret")
     monkeypatch.setenv("TAVILY_API_KEY", "tvly-secret")
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fc-secret")
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-openai-secret")
     monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_KEY", "sk-supabase-secret")
     s = Settings(_env_file=None)
     repr_str = repr(s)
     assert "super_secret_token" not in repr_str
     assert "sk-secret" not in repr_str
+
+
+def test_openai_api_key_required(monkeypatch):
+    """Verifica che OPENAI_API_KEY sia obbligatorio."""
+    for var in ["TELEGRAM_BOT_TOKEN", "AUTHORIZED_USER_ID", "DEEPSEEK_API_KEY",
+                "TAVILY_API_KEY", "FIRECRAWL_API_KEY", "SUPABASE_URL",
+                "SUPABASE_SERVICE_KEY"]:
+        monkeypatch.setenv(var, "fake")
+    monkeypatch.setenv("AUTHORIZED_USER_ID", "1")
+    # OPENAI_API_KEY deliberately not set
+    with pytest.raises(ValidationError):
+        Settings(_env_file=None)

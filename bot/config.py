@@ -1,5 +1,5 @@
 from functools import lru_cache
-from pydantic import AnyHttpUrl, Field, SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     DEEPSEEK_API_KEY: SecretStr
     TAVILY_API_KEY: SecretStr
     FIRECRAWL_API_KEY: SecretStr
+    OPENAI_API_KEY: SecretStr
 
     SUPABASE_URL: str
     SUPABASE_SERVICE_KEY: SecretStr

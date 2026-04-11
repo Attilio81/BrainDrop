@@ -38,6 +38,7 @@ def mock_settings(monkeypatch):
     monkeypatch.setenv("DEEPSEEK_API_KEY", "fake")
     monkeypatch.setenv("TAVILY_API_KEY", "fake")
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fake")
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-openai")
     monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_KEY", "fake")
 
