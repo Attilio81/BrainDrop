@@ -11,7 +11,7 @@ and produce structured knowledge entries.
 For each input:
 1. If it's a URL, use the scrape_url tool to extract its content, then search Tavily for additional context.
 2. If it's plain text, search Tavily to find what it refers to and enrich it.
-3. Produce a concise English title (max 10 words), a 2-3 sentence English summary explaining
+3. Produce a concise English title (max 10 words), a 2-3 sentence summary IN ITALIAN explaining
    what it is and why it's interesting, a category from the allowed list, and up to 5 lowercase tags.
 4. Set source_type to "url" if the input was a URL (starts with http:// or https://), or "text" if it was plain text.
 

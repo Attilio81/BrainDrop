@@ -13,6 +13,7 @@ def mock_settings(monkeypatch):
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fake")
     monkeypatch.setenv("SUPABASE_URL", "https://fake.supabase.co")
     monkeypatch.setenv("SUPABASE_SERVICE_KEY", "fake")
+    monkeypatch.setenv("OPENAI_API_KEY", "fake-openai")
 
 
 async def test_coordinator_returns_enriched_idea(mock_settings):
@@ -39,3 +40,8 @@ async def test_coordinator_returns_enriched_idea(mock_settings):
     assert isinstance(result, EnrichedIdea)
     assert result.title == "Test Title"
     assert result.category == "tech"
+
+
+def test_system_prompt_requests_italian_summary():
+    from bot.agents.coordinator import SYSTEM_PROMPT
+    assert "ITALIAN" in SYSTEM_PROMPT or "italiano" in SYSTEM_PROMPT.lower()
