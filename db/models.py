@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 CATEGORIES = Literal[
@@ -20,8 +20,8 @@ class EnrichedIdea(BaseModel):
     category: CATEGORIES
     source_type: SOURCE_TYPES
     tags: list[str]
-    source_url: str | None
-    thumbnail_url: str | None
+    source_url: str | None = None       # optional — LLM may omit
+    thumbnail_url: str | None = None    # optional — LLM may omit
 
 
 class IdeaCreate(BaseModel):
@@ -29,16 +29,20 @@ class IdeaCreate(BaseModel):
     title: str
     summary: str
     original_content: str
+    # source_type and category are str (not Literal) — validated upstream by EnrichedIdea.
+    # Kept loose to allow future categories without code changes.
     source_type: str
     category: str
     tags: list[str]
     source_url: str | None = None
     thumbnail_url: str | None = None
-    enrichment_data: dict = {}
+    enrichment_data: dict[str, Any] = Field(default_factory=dict)
 
 
 class Idea(IdeaCreate):
     """Full idea record as stored in Supabase."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     created_at: datetime
     published: bool = False
