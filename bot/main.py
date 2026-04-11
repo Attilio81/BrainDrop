@@ -1,0 +1,66 @@
+import logging
+
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+
+import bot.handlers as handlers
+from bot.agents.coordinator import Coordinator
+from bot.config import get_settings
+from db.client import SupabaseClient
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO,
+)
+logger = logging.getLogger(__name__)
+
+
+async def post_init(application):
+    """Initialize singletons after event loop is running."""
+    settings = get_settings()
+    handlers.coordinator = Coordinator()
+    handlers.db = await SupabaseClient.create(
+        url=settings.SUPABASE_URL,
+        key=settings.SUPABASE_SERVICE_KEY.get_secret_value(),
+    )
+    logger.info("BrainDrop bot initialized.")
+
+
+def main() -> None:
+    settings = get_settings()
+
+    app = (
+        ApplicationBuilder()
+        .token(settings.TELEGRAM_BOT_TOKEN.get_secret_value())
+        .post_init(post_init)
+        .build()
+    )
+
+    # Static commands
+    app.add_handler(CommandHandler("start", handlers.handle_start))
+    app.add_handler(CommandHandler("list", handlers.handle_list))
+
+    # Dynamic commands matched via regex (must be before generic text handler)
+    app.add_handler(
+        MessageHandler(
+            filters.Regex(r"^/publish_[a-f0-9]{8}$"),
+            handlers.handle_publish,
+        )
+    )
+    app.add_handler(
+        MessageHandler(
+            filters.Regex(r"^/delete_[a-f0-9]{8}$"),
+            handlers.handle_delete,
+        )
+    )
+
+    # Generic text + URL messages
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handlers.handle_message)
+    )
+
+    logger.info("Starting BrainDrop bot (polling mode)...")
+    app.run_polling()
+
+
+if __name__ == "__main__":
+    main()
