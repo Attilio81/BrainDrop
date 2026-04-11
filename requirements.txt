@@ -1,6 +1,6 @@
 python-telegram-bot>=21.0
 agno
-supabase>=2.0.0
+supabase>=2.18.0
 pydantic-settings>=2.0.0
 tavily-python
 firecrawl-py
