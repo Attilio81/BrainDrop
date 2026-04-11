@@ -97,9 +97,9 @@ async def handle_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     lines = []
     for idea in ideas:
-        status = "✅" if idea.published else "📤"
+        status = "✅ pubblicato" if idea.published else "📤 bozza"
         short_id = str(idea.id)[:8]
-        lines.append(f"{status} {idea.title} — /publish_{short_id} | /delete_{short_id}")
+        lines.append(f"{status} — {idea.title} | /publish_{short_id} | /delete_{short_id}")
 
     await update.message.reply_text("\n".join(lines))
 

@@ -1,4 +1,5 @@
 # tests/test_handlers.py
+import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from db.models import EnrichedIdea, Idea
@@ -76,3 +77,24 @@ async def test_unauthorized_list_ignored(mock_settings):
     update = make_update("/list", user_id=999)
     await handle_list(update, make_context())
     update.message.reply_text.assert_not_called()
+
+
+async def test_agent_timeout_saves_raw(mock_settings):
+    fake_idea = make_fake_idea()
+
+    with (
+        patch("bot.handlers.coordinator") as mock_coord,
+        patch("bot.handlers.db") as mock_db,
+    ):
+        mock_coord.process = AsyncMock(side_effect=asyncio.TimeoutError())
+        mock_db.save_raw = AsyncMock(return_value=fake_idea)
+
+        from bot.handlers import handle_message
+        update = make_update("some text", user_id=42)
+        await handle_message(update, make_context())
+
+    update.message.reply_text.assert_called()
+    # Last call should be the warning message
+    last_call_text = update.message.reply_text.call_args_list[-1][0][0]
+    assert "⚠️" in last_call_text
+    mock_db.save_raw.assert_called_once()
