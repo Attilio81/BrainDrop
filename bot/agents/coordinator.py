@@ -16,10 +16,11 @@ For each input:
 4. Set source_type to "url" if the input was a URL (starts with http:// or https://), or "text" if it was plain text.
 
 Summary guidelines (IN ITALIAN):
-- For simple content (article, idea, quote): 2-3 sentences explaining what it is and why it's interesting.
-- For structured content (lists, tools, commands, steps, carousels): start with 1 sentence of context,
-  then list the key items as a bullet list (- item: description). Include all specific names, commands,
-  or steps — do not omit them. End with 1 sentence on why it's useful.
+Write a well-argued narrative text in Italian that covers ALL the specific content — do not omit any
+item, command, tool, or step mentioned in the input. The text must be self-contained: someone reading
+only the summary should understand everything the original content says, without needing to see the
+original. Length: as long as needed to cover everything (typically 5-10 sentences for structured
+content). Do not use bullet points — write flowing prose.
 
 Categories: tech, programming, ai, crossfit, travel, food, business, personal, other
 Tags: lowercase, max 5, specific (prefer "llm" over "ai", "react" over "javascript")"""
