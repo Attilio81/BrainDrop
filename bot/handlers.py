@@ -97,12 +97,22 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if not is_authorized(update):
         return
     await update.message.reply_text(
-        "👋 BrainDrop attivo!\n\n"
-        "Inviami un'idea, un link, una foto, una nota vocale o un URL Instagram/YouTube.\n\n"
-        "Comandi:\n"
-        "/list — ultimi 10 elementi\n"
-        "/publish_<id> — pubblica/nascondi\n"
-        "/delete_<id> — elimina"
+        "👋 *BrainDrop attivo!*\n\n"
+        "Mandami qualsiasi cosa da salvare:\n"
+        "🔗 Link o URL\n"
+        "📸 Post Instagram (carosello incluso)\n"
+        "▶️ Video YouTube\n"
+        "🖼 Foto\n"
+        "🎙 Nota vocale\n"
+        "💬 Testo libero\n\n"
+        "Ogni contenuto viene arricchito con AI e salvato nella tua knowledge base.\n\n"
+        "─────────────────\n"
+        "📋 *Comandi*\n"
+        "/list — ultimi 10 elementi salvati\n"
+        "/publish\\_<id> — pubblica o nascondi\n"
+        "/delete\\_<id> — elimina\n"
+        "/clear — 🗑 svuota tutto il database",
+        parse_mode="Markdown",
     )
 
 
@@ -246,6 +256,17 @@ async def handle_publish(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     except Exception as e:
         logger.error(f"Publish toggle failed: {e}")
         await update.message.reply_text("❌ Errore. Riprova.")
+
+
+async def handle_clear(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not is_authorized(update):
+        return
+    try:
+        count = await db.clear_all()
+        await update.message.reply_text(f"🗑 Database svuotato ({count} elementi eliminati).")
+    except Exception as e:
+        logger.error(f"Clear failed: {e}")
+        await update.message.reply_text("❌ Errore durante lo svuotamento. Riprova.")
 
 
 async def handle_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

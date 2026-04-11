@@ -73,6 +73,11 @@ class SupabaseClient:
             .execute()
         )
 
+    async def clear_all(self) -> int:
+        """Hard-delete all ideas. Returns count of deleted rows."""
+        res = await self._db.table("ideas").delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
+        return len(res.data)
+
     async def resolve_short_id(self, short_id: str) -> str:
         res = (
             await self._db.table("ideas")

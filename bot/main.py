@@ -41,6 +41,7 @@ def main() -> None:
     # Static commands
     app.add_handler(CommandHandler("start", handlers.handle_start))
     app.add_handler(CommandHandler("list", handlers.handle_list))
+    app.add_handler(CommandHandler("clear", handlers.handle_clear))
 
     # Dynamic commands matched via regex (before generic text handler)
     app.add_handler(
