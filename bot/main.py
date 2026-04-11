@@ -1,5 +1,8 @@
 import logging
 
+from dotenv import load_dotenv
+load_dotenv()  # Export .env values into os.environ so third-party libs (Tavily, DeepSeek) can read them
+
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 
 import bot.handlers as handlers
