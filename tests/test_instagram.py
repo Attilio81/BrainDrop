@@ -39,3 +39,33 @@ async def test_extract_returns_none_on_instaloader_error(mock_settings):
                side_effect=Exception("QueryReturnedNotFoundException")):
         result = await extract("https://www.instagram.com/p/DW2fmbrjP2C/")
     assert result is None
+
+
+async def test_extract_success_returns_correct_structure(mock_settings):
+    from bot.agents.instagram import extract
+    mock_post = MagicMock()
+    mock_post.caption = "Test caption"
+    mock_post.url = "https://cdn.instagram.com/thumb.jpg"
+    mock_post.typename = "GraphImage"
+    mock_post.is_video = False
+
+    mock_http_response = MagicMock()
+    mock_http_response.raise_for_status = MagicMock()
+    mock_http_response.content = b"fake-image-bytes"
+
+    with patch("bot.agents.instagram.instaloader.Post.from_shortcode", return_value=mock_post), \
+         patch("bot.agents.instagram._ocr_image", return_value="Slide text here"), \
+         patch("bot.agents.instagram.httpx.Client") as MockHttpxClient:
+        mock_client_instance = MagicMock()
+        mock_client_instance.__enter__ = MagicMock(return_value=mock_client_instance)
+        mock_client_instance.__exit__ = MagicMock(return_value=False)
+        mock_client_instance.get = MagicMock(return_value=mock_http_response)
+        MockHttpxClient.return_value = mock_client_instance
+
+        result = await extract("https://www.instagram.com/p/DW2fmbrjP2C/")
+
+    assert result is not None
+    assert result["source_url"] == "https://www.instagram.com/p/DW2fmbrjP2C/"
+    assert result["thumbnail_url"] == "https://cdn.instagram.com/thumb.jpg"
+    assert "Caption: Test caption" in result["text"]
+    assert "Slide 1:" in result["text"]
