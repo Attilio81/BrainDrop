@@ -42,7 +42,7 @@ def main() -> None:
     app.add_handler(CommandHandler("start", handlers.handle_start))
     app.add_handler(CommandHandler("list", handlers.handle_list))
 
-    # Dynamic commands matched via regex (must be before generic text handler)
+    # Dynamic commands matched via regex (before generic text handler)
     app.add_handler(
         MessageHandler(
             filters.Regex(r"^/publish_[a-f0-9]{8}$"),
@@ -55,6 +55,10 @@ def main() -> None:
             handlers.handle_delete,
         )
     )
+
+    # Phase 2: media handlers (before generic text catch-all)
+    app.add_handler(MessageHandler(filters.PHOTO, handlers.handle_photo))
+    app.add_handler(MessageHandler(filters.VOICE, handlers.handle_voice))
 
     # Generic text + URL messages
     app.add_handler(
