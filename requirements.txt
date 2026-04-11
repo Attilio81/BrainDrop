@@ -6,4 +6,4 @@ tavily-python
 firecrawl-py
 httpx
 pytest
-pytest-asyncio
+pytest-asyncio>=0.21
