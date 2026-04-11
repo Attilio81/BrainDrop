@@ -28,7 +28,7 @@ class Coordinator:
                 scrape_url,
             ],
             instructions=SYSTEM_PROMPT,
-            output_model=EnrichedIdea,
+            output_schema=EnrichedIdea,
         )
 
     async def process(self, text: str) -> EnrichedIdea:
