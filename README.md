@@ -25,7 +25,7 @@ Tu mandi qualcosa su Telegram
         ↓
 BrainDrop estrae il contenuto
         ↓
-DeepSeek R1 analizza e arricchisce
+DeepSeek V3 analizza e arricchisce
         ↓
 Salvato in Supabase, pronto da gestire
         ↓
@@ -38,12 +38,12 @@ Admin panel React per pubblicare e modificare
 
 | Input | Cosa succede |
 |---|---|
-| 🔗 **URL / articolo** | Scraping (Firecrawl) + contesto (Tavily) → entry strutturata |
+| 🔗 **URL / articolo** | Scraping (Firecrawl) → entry strutturata |
 | 📸 **Post Instagram** | Caption + OCR di ogni slide del carosello (GPT-4o-mini) → testo completo |
 | ▶️ **Video YouTube** | Metadati + trascrizione automatica → riassunto |
 | 🖼 **Foto Telegram** | Descrizione visiva + OCR (GPT-4o-mini) → testo |
 | 🎙 **Nota vocale** | Trascrizione (OpenAI Whisper) → testo |
-| 💬 **Testo libero** | Ricerca Tavily per contesto → entry arricchita |
+| 💬 **Testo libero** | Analisi diretta → entry arricchita |
 
 Ogni entry riceve: **titolo in inglese**, **riassunto narrativo in italiano**, **categoria**, **tag**, **URL sorgente**.
 
@@ -54,7 +54,7 @@ Ogni entry riceve: **titolo in inglese**, **riassunto narrativo in italiano**, *
 | Layer | Tecnologia |
 |---|---|
 | Bot | python-telegram-bot |
-| Reasoning | DeepSeek R1 via Agno |
+| AI | DeepSeek V3 (Chat) via Agno |
 | Web search | Tavily |
 | Web scraping | Firecrawl |
 | Vision / OCR | GPT-4o-mini (OpenAI) |
@@ -169,7 +169,7 @@ Funzionalità: filtro per testo / categoria / tag, edit modale con titolo, summa
 BrainDrop/
 ├── bot/
 │   ├── agents/
-│   │   ├── coordinator.py    # Agno agent — DeepSeek R1 + Tavily + Firecrawl + YouTubeTools
+│   │   ├── coordinator.py    # Agno agent — DeepSeek V3 + Firecrawl + YouTubeTools (Tavily last resort)
 │   │   ├── instagram.py      # instaloader + GPT-4o-mini OCR
 │   │   ├── photo.py          # GPT-4o-mini Vision
 │   │   ├── voice.py          # OpenAI Whisper
