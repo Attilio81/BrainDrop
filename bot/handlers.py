@@ -77,10 +77,13 @@ async def _save_and_reply(
         saved = await db.save_idea(idea_create)
         short_id = str(saved.id)[:8]
         tags_str = " ".join(f"#{t}" for t in enriched.tags)
+        final_source_url = source_url or enriched.source_url
+        source_line = f"\n🌐 {final_source_url}" if final_source_url else ""
         reply = (
             f"✅ Salvato: {enriched.title}\n"
             f"📂 {enriched.category} | 🏷 {tags_str}\n"
-            f"📝 {enriched.summary}\n"
+            f"📝 {enriched.summary}"
+            f"{source_line}\n"
             f"🔗 /publish_{short_id}"
         )
     except (asyncio.TimeoutError, Exception) as e:
