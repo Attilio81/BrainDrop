@@ -60,7 +60,7 @@ Ogni entry riceve: **titolo in inglese**, **riassunto narrativo in italiano**, *
 | Vision / OCR | GPT-4o-mini (OpenAI) |
 | Voice | Whisper (OpenAI) |
 | Instagram | instaloader |
-| YouTube | yt-dlp + youtube-transcript-api |
+| YouTube | Agno YouTubeTools (trascrizioni + metadata) |
 | Database | Supabase (PostgreSQL + RLS) |
 | Admin panel | React 19 + Vite 5 + TanStack Query + shadcn/ui |
 
@@ -169,11 +169,11 @@ Funzionalità: filtro per testo / categoria / tag, edit modale con titolo, summa
 BrainDrop/
 ├── bot/
 │   ├── agents/
-│   │   ├── coordinator.py    # Agno agent — DeepSeek R1 + Tavily + Firecrawl
+│   │   ├── coordinator.py    # Agno agent — DeepSeek R1 + Tavily + Firecrawl + YouTubeTools
 │   │   ├── instagram.py      # instaloader + GPT-4o-mini OCR
 │   │   ├── photo.py          # GPT-4o-mini Vision
 │   │   ├── voice.py          # OpenAI Whisper
-│   │   ├── youtube.py        # yt-dlp + trascrizioni
+│   │   ├── youtube.py        # yt-dlp (metadata fallback)
 │   │   └── tools.py          # Firecrawl tool per Agno
 │   ├── handlers.py           # Handler Telegram
 │   ├── config.py             # Configurazione (pydantic-settings)
