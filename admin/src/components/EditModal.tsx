@@ -53,7 +53,7 @@ export default function EditModal({ idea, onClose }: Props) {
   function handleSave() {
     const patch: IdeaPatch = { title, summary, category, tags, notes: notes || null }
     updateIdea.mutate(
-      { id: idea.id, patch },
+      { id: idea!.id, patch },
       { onSuccess: onClose }
     )
   }
