@@ -144,7 +144,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         media_result = await extract_instagram(text)
         media_source_type = "instagram"
     elif is_youtube_url(text):
-        media_result = await extract_youtube(text)
+        # No pre-extraction: coordinator uses YouTubeTools directly
         media_source_type = "youtube"
 
     # Extraction attempted but failed

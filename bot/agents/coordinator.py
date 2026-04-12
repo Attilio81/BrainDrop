@@ -1,6 +1,7 @@
 from agno.agent import Agent
 from agno.models.deepseek import DeepSeek
 from agno.tools.tavily import TavilyTools
+from agno.tools.youtube import YouTubeTools
 
 from bot.agents.tools import scrape_url
 from db.models import EnrichedIdea
@@ -9,11 +10,15 @@ SYSTEM_PROMPT = """You are a personal knowledge assistant. You receive raw text 
 and produce structured knowledge entries.
 
 For each input:
-1. If it's a URL, use the scrape_url tool to extract its content, then search Tavily for additional context.
-2. If it's plain text, search Tavily to find what it refers to and enrich it.
-3. Produce a concise English title (max 10 words), a summary IN ITALIAN, a category from the
+1. If it's a YouTube URL, use get_youtube_video_data to get title/channel/thumbnail, then
+   get_youtube_video_captions to get the transcript. Use Tavily only if no transcript is available.
+2. If it's any other URL, use the scrape_url tool to extract its content, then search Tavily for
+   additional context.
+3. If it's plain text, search Tavily to find what it refers to and enrich it.
+4. Produce a concise English title (max 10 words), a summary IN ITALIAN, a category from the
    allowed list, and up to 5 lowercase tags.
-4. Set source_type to "url" if the input was a URL (starts with http:// or https://), or "text" if it was plain text.
+5. Always set source_url to the original URL if provided.
+6. Always set thumbnail_url if you found one (e.g. from get_youtube_video_data).
 
 Summary guidelines (IN ITALIAN):
 Write a well-argued narrative text in Italian that covers ALL the specific content — do not omit any
@@ -32,6 +37,7 @@ class Coordinator:
             model=DeepSeek(id="deepseek-reasoner"),
             tools=[
                 TavilyTools(search_depth="advanced", include_answer=True),
+                YouTubeTools(languages=["it", "en", "a.it", "a.en"]),
                 scrape_url,
             ],
             instructions=SYSTEM_PROMPT,

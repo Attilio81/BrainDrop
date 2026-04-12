@@ -1,17 +1,17 @@
 import logging
 
-from firecrawl import FirecrawlApp
+from firecrawl.v1 import V1FirecrawlApp
 
 logger = logging.getLogger(__name__)
 
-_app: FirecrawlApp | None = None
+_app: V1FirecrawlApp | None = None
 
 
-def _get_app() -> FirecrawlApp:
+def _get_app() -> V1FirecrawlApp:
     global _app
     if _app is None:
         from bot.config import get_settings
-        _app = FirecrawlApp(api_key=get_settings().FIRECRAWL_API_KEY.get_secret_value())
+        _app = V1FirecrawlApp(api_key=get_settings().FIRECRAWL_API_KEY.get_secret_value())
     return _app
 
 
