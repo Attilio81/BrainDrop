@@ -139,16 +139,18 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     # Detect special media URLs and extract content
     media_result = None
     media_source_type = None
+    extraction_attempted = False
 
     if is_instagram_url(text):
         media_result = await extract_instagram(text)
         media_source_type = "instagram"
+        extraction_attempted = True
     elif is_youtube_url(text):
         # No pre-extraction: coordinator uses YouTubeTools directly
         media_source_type = "youtube"
 
-    # Extraction attempted but failed
-    if media_source_type is not None and media_result is None:
+    # Extraction was attempted but failed (not applicable to YouTube)
+    if extraction_attempted and media_result is None:
         saved = await db.save_raw(text, media_source_type)
         short_id = str(saved.id)[:8]
         await processing_msg.delete()
