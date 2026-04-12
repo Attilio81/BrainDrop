@@ -52,9 +52,10 @@ export interface Filters {
   text: string
   category: Category | ''
   tags: string[]
+  semantic: boolean
 }
 
-export const DEFAULT_FILTERS: Filters = { text: '', category: '', tags: [] }
+export const DEFAULT_FILTERS: Filters = { text: '', category: '', tags: [], semantic: false }
 
 export const SOURCE_TYPE_EMOJI: Record<SourceType, string> = {
   url: '🔗',

@@ -22,6 +22,18 @@ logger = logging.getLogger(__name__)
 coordinator: Coordinator = None  # type: ignore
 db: SupabaseClient = None  # type: ignore
 
+
+async def _embed_and_store(idea_id: str, enriched) -> None:
+    """Generate and store embedding for a saved idea. Fire-and-forget."""
+    from bot.agents.embeddings import generate_embedding
+    text = f"{enriched.title} {enriched.summary} {enriched.details} {' '.join(enriched.tags)}"
+    embedding = await generate_embedding(text)
+    if embedding:
+        try:
+            await db.update_embedding(str(idea_id), embedding)
+        except Exception as e:
+            logger.warning(f"Failed to store embedding for {idea_id}: {e}")
+
 URL_RE = re.compile(r"^https?://\S+$")
 _INSTAGRAM_RE = re.compile(r"https?://(www\.)?instagram\.com/(p|reel)/[A-Za-z0-9_-]+")
 _YOUTUBE_RE = re.compile(
@@ -76,6 +88,7 @@ async def _save_and_reply(
             enrichment_data=enrichment_data,
         )
         saved = await db.save_idea(idea_create)
+        asyncio.create_task(_embed_and_store(str(saved.id), enriched))
         short_id = str(saved.id)[:8]
         tags_str = " ".join(f"#{t}" for t in enriched.tags)
         final_source_url = enriched.source_url or source_url

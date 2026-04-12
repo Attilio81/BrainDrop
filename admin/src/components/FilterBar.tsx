@@ -45,21 +45,41 @@ export default function FilterBar({ filters, availableTags, onChange }: Props) {
         flexWrap: 'wrap',
       }}
     >
+      <button
+        onClick={() => onChange({ ...filters, semantic: !filters.semantic, text: '' })}
+        title={filters.semantic ? 'Modalità parola chiave' : 'Modalità semantica (per significato)'}
+        style={{
+          background: filters.semantic ? 'var(--accent-bg)' : 'var(--surface2)',
+          border: `1px solid ${filters.semantic ? '#c4b9f5' : 'var(--border2)'}`,
+          borderRadius: 6,
+          padding: '7px 10px',
+          fontSize: 14,
+          color: filters.semantic ? 'var(--accent)' : 'var(--fg-muted)',
+          cursor: 'pointer',
+          transition: 'all 0.12s',
+          flexShrink: 0,
+          lineHeight: 1,
+        }}
+      >
+        🧠
+      </button>
+
       <input
         type="text"
-        placeholder="Cerca per titolo o summary…"
+        placeholder={filters.semantic ? 'Cerca per significato…' : 'Cerca per titolo o summary…'}
         value={inputValue}
         onChange={(e) => handleTextChange(e.target.value)}
         style={{
           background: 'var(--surface2)',
-          border: '1px solid var(--border2)',
+          border: `1px solid ${filters.semantic ? '#c4b9f5' : 'var(--border2)'}`,
           borderRadius: 6,
           padding: '7px 13px',
           color: 'var(--fg)',
           fontFamily: 'var(--font-body)',
           fontSize: 13,
-          width: 240,
+          width: 260,
           outline: 'none',
+          transition: 'border-color 0.12s',
         }}
       />
 

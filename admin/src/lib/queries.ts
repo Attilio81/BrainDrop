@@ -3,6 +3,39 @@ import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase'
 import type { Filters, Idea, IdeaPatch, Tab } from '@/types'
 
+export type SemanticIdea = Idea & { similarity: number }
+
+export function useSemanticSearch(query: string, tab: Tab, enabled: boolean) {
+  return useQuery({
+    queryKey: ['ideas', 'semantic', tab, query],
+    queryFn: async (): Promise<SemanticIdea[]> => {
+      const resp = await fetch('https://api.openai.com/v1/embeddings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({ model: 'text-embedding-3-small', input: query }),
+      })
+      if (!resp.ok) throw new Error(`OpenAI embeddings error: ${resp.status}`)
+      const { data } = await resp.json()
+      const embedding: number[] = data[0].embedding
+
+      const { data: results, error } = await supabase.rpc('match_ideas', {
+        query_embedding: embedding,
+        match_threshold: 0.25,
+        match_count: 20,
+        filter_published: tab === 'published' ? true : tab === 'inbox' ? false : null,
+        filter_deleted: tab === 'trash',
+      })
+      if (error) throw error
+      return (results ?? []) as SemanticIdea[]
+    },
+    enabled,
+    staleTime: 30_000,
+  })
+}
+
 // ── READ ──────────────────────────────────────────────────────────────────
 
 export function useIdeas(tab: Tab, filters: Filters) {

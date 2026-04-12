@@ -6,7 +6,7 @@ import TabNav from '@/components/TabNav'
 import FilterBar from '@/components/FilterBar'
 import IdeaRow from '@/components/IdeaRow'
 import EditModal from '@/components/EditModal'
-import { useIdeas, useInboxCount } from '@/lib/queries'
+import { useIdeas, useInboxCount, useSemanticSearch } from '@/lib/queries'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { Tab, Filters, Idea } from '@/types'
@@ -18,8 +18,13 @@ function AdminShell() {
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null)
 
   const qc = useQueryClient()
-  const { data: ideas = [], isLoading } = useIdeas(tab, filters)
+  const semanticEnabled = filters.semantic && filters.text.trim().length >= 3
+  const { data: ideas = [], isLoading } = useIdeas(tab, semanticEnabled ? { ...filters, text: '' } : filters)
+  const { data: semanticIdeas = [], isLoading: isSemanticLoading } = useSemanticSearch(filters.text, tab, semanticEnabled)
   const { data: inboxCount = 0 } = useInboxCount()
+
+  const displayedIdeas = semanticEnabled ? semanticIdeas : ideas
+  const isLoadingAny = semanticEnabled ? isSemanticLoading : isLoading
 
   async function handleClearAll() {
     if (!window.confirm('Eliminare TUTTE le idee? Operazione irreversibile.')) return
@@ -38,6 +43,7 @@ function AdminShell() {
   }
 
   const availableTags = [...new Set(ideas.flatMap((i) => i.tags))].sort()
+
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
@@ -115,17 +121,17 @@ function AdminShell() {
 
       {/* IDEA LIST */}
       <div style={{ padding: '12px 16px' }}>
-        {isLoading && (
+        {isLoadingAny && (
           <p style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 13, padding: '24px 10px' }}>
-            Caricamento…
+            {semanticEnabled ? '🧠 Ricerca semantica…' : 'Caricamento…'}
           </p>
         )}
-        {!isLoading && ideas.length === 0 && (
+        {!isLoadingAny && displayedIdeas.length === 0 && (
           <p style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 13, padding: '24px 10px' }}>
-            Nessuna idea in questa vista.
+            {semanticEnabled ? 'Nessun risultato semantico trovato.' : 'Nessuna idea in questa vista.'}
           </p>
         )}
-        {ideas.map((idea) => (
+        {displayedIdeas.map((idea) => (
           <IdeaRow
             key={idea.id}
             idea={idea}

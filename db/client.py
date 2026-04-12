@@ -89,6 +89,15 @@ class SupabaseClient:
         )
         return Idea(**res.data[0]) if res.data else None
 
+    async def update_embedding(self, idea_id: str, embedding: list[float]) -> None:
+        """Store the embedding vector for an idea."""
+        await (
+            self._db.table("ideas")
+            .update({"embedding": embedding})
+            .eq("id", idea_id)
+            .execute()
+        )
+
     async def resolve_short_id(self, short_id: str) -> str:
         res = (
             await self._db.table("ideas")
