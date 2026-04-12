@@ -70,14 +70,14 @@ async def _save_and_reply(
             source_type=source_type,
             category=enriched.category,
             tags=enriched.tags,
-            source_url=source_url or enriched.source_url,
+            source_url=enriched.source_url or source_url,
             thumbnail_url=thumbnail_url or enriched.thumbnail_url,
             enrichment_data=enrichment_data,
         )
         saved = await db.save_idea(idea_create)
         short_id = str(saved.id)[:8]
         tags_str = " ".join(f"#{t}" for t in enriched.tags)
-        final_source_url = source_url or enriched.source_url
+        final_source_url = enriched.source_url or source_url
         source_line = f"\n🌐 {final_source_url}" if final_source_url else ""
         reply = (
             f"✅ Salvato: {enriched.title}\n"
