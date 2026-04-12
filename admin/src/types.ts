@@ -28,6 +28,7 @@ export interface Idea {
   updated_at: string
   title: string
   summary: string
+  details: string
   original_content: string
   enrichment_data: Record<string, unknown>
   source_type: SourceType

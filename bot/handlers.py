@@ -66,6 +66,7 @@ async def _save_and_reply(
         idea_create = IdeaCreate(
             title=enriched.title,
             summary=enriched.summary,
+            details=enriched.details,
             original_content=original_text,
             source_type=source_type,
             category=enriched.category,

@@ -28,13 +28,14 @@ Processing rules:
 
 Output:
 - title: concise English title, max 10 words
-- summary: IN ITALIAN, self-contained and schematic. Always structured as:
-  1. One sentence explaining what the content is about.
-  2. Bullet list (–) of ALL the specific points, items, repos, tools, steps, or concepts mentioned.
-     For each repo or link: include name + URL. Never omit any item.
-     For explanatory content: one bullet per key concept or insight.
-  3. One closing sentence with takeaway or context (optional, only if adds value).
-  Never write generic vague summaries like "various tools" or "multiple repos". Name everything.
+- summary: 2-4 sentences of narrative prose IN ITALIAN. Explain what the content is about,
+  its context, and why it matters. No bullet points — flowing prose only.
+- details: schematic breakdown IN ITALIAN. Always structured as:
+  1. One short intro line (what kind of content this is).
+  2. Bullet list (–) enumerating EVERY specific item mentioned: repos (name + full URL),
+     tools, concepts, steps, tips. One bullet per item. Never omit any item.
+  3. One closing line with takeaway (optional).
+  Never write "various tools" or "multiple repos" — name every single one.
 - category: one of tech, programming, ai, crossfit, travel, food, business, personal, other
 - tags: up to 5 lowercase specific tags (prefer "llm" over "ai", "react" over "javascript")
 - source_url: original URL if present in the input. If the content's primary subject is a

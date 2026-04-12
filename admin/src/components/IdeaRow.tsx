@@ -300,6 +300,35 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
             </div>
           </div>
 
+          {/* Details — schematic breakdown */}
+          {idea.details && (
+            <div style={{ padding: '12px 16px', background: 'var(--surface2)', borderTop: '1px solid var(--border2)' }}>
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  letterSpacing: '1.2px',
+                  textTransform: 'uppercase',
+                  color: 'var(--fg-dim)',
+                  marginBottom: 7,
+                }}
+              >
+                Dettagli
+              </div>
+              <div
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  fontSize: 13,
+                  lineHeight: 1.75,
+                  color: 'var(--fg)',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {idea.details}
+              </div>
+            </div>
+          )}
+
           {/* Source URL */}
           {idea.source_url && (
             <div

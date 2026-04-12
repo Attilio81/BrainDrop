@@ -16,7 +16,8 @@ SOURCE_TYPES = Literal["url", "text"]
 class EnrichedIdea(BaseModel):
     """Structured output returned by the Agno coordinator agent."""
     title: str
-    summary: str
+    summary: str        # narrative prose — context and meaning
+    details: str        # schematic bullet list — every specific item, repo, URL, step
     category: CATEGORIES
     source_type: SOURCE_TYPES
     tags: list[str]
@@ -28,6 +29,7 @@ class IdeaCreate(BaseModel):
     """Data required to insert a new idea into Supabase."""
     title: str
     summary: str
+    details: str = ""
     original_content: str
     # source_type and category are str (not Literal) — validated upstream by EnrichedIdea.
     # Kept loose to allow future categories without code changes.
@@ -48,3 +50,4 @@ class Idea(IdeaCreate):
     published: bool = False
     published_at: datetime | None = None
     deleted_at: datetime | None = None
+    notes: str | None = None
