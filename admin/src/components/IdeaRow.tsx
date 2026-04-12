@@ -1,8 +1,37 @@
 import { useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import type { Idea, Tab } from '@/types'
 import { SOURCE_TYPE_EMOJI, CATEGORY_COLORS } from '@/types'
 import { useTogglePublish, useSoftDelete, useRestore, useHardDelete } from '@/lib/queries'
+
+const URL_RE = /https?:\/\/[^\s\)\],'"]+/g
+
+function renderWithLinks(text: string): ReactNode[] {
+  const parts: ReactNode[] = []
+  let last = 0
+  let match: RegExpExecArray | null
+  URL_RE.lastIndex = 0
+  while ((match = URL_RE.exec(text)) !== null) {
+    if (match.index > last) parts.push(text.slice(last, match.index))
+    const url = match[0]
+    parts.push(
+      <a
+        key={match.index}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{ color: '#3b82f6', textDecoration: 'none', wordBreak: 'break-all' }}
+        onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline' }}
+        onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none' }}
+      >
+        {url}
+      </a>
+    )
+    last = match.index + url.length
+  }
+  if (last < text.length) parts.push(text.slice(last))
+  return parts
+}
 
 interface Props {
   idea: Idea
@@ -296,7 +325,7 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
                 whiteSpace: 'pre-wrap',
               }}
             >
-              {idea.summary}
+              {renderWithLinks(idea.summary)}
             </div>
           </div>
 
@@ -324,7 +353,7 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
                   whiteSpace: 'pre-wrap',
                 }}
               >
-                {idea.details}
+                {renderWithLinks(idea.details)}
               </div>
             </div>
           )}
