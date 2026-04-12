@@ -132,27 +132,26 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
           </div>
         </div>
 
-        {/* NOTES TOGGLE */}
-        {idea.notes && (
-          <button
-            onClick={() => setNotesOpen(v => !v)}
-            title={notesOpen ? 'Chiudi note' : 'Vedi note'}
-            style={{
-              background: notesOpen ? 'var(--accent-bg)' : 'transparent',
-              border: `1px solid ${notesOpen ? '#c4b9f5' : 'var(--border2)'}`,
-              borderRadius: 5,
-              padding: '4px 8px',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11,
-              color: notesOpen ? 'var(--accent)' : 'var(--fg-dim)',
-              cursor: 'pointer',
-              transition: 'all 0.12s',
-              flexShrink: 0,
-            }}
-          >
-            📝
-          </button>
-        )}
+        {/* NOTES TOGGLE — sempre visibile */}
+        <button
+          onClick={() => setNotesOpen(v => !v)}
+          title={notesOpen ? 'Chiudi note' : idea.notes ? 'Vedi note' : 'Nessuna nota'}
+          style={{
+            background: notesOpen ? 'var(--accent-bg)' : 'transparent',
+            border: `1px solid ${notesOpen ? '#c4b9f5' : 'var(--border2)'}`,
+            borderRadius: 5,
+            padding: '4px 8px',
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            color: notesOpen ? 'var(--accent)' : idea.notes ? 'var(--fg-muted)' : 'var(--fg-dim)',
+            cursor: 'pointer',
+            transition: 'all 0.12s',
+            flexShrink: 0,
+            opacity: idea.notes ? 1 : 0.4,
+          }}
+        >
+          📝
+        </button>
 
         {/* TIME */}
         <div
@@ -227,22 +226,23 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
       </div>
 
       {/* NOTES INLINE PANEL */}
-      {notesOpen && idea.notes && (
+      {notesOpen && (
         <div
           style={{
             margin: '0 12px 10px 64px',
             padding: '12px 16px',
-            background: 'var(--accent-bg)',
-            border: '1px solid #c4b9f5',
+            background: idea.notes ? 'var(--accent-bg)' : 'var(--surface2)',
+            border: `1px solid ${idea.notes ? '#c4b9f5' : 'var(--border2)'}`,
             borderRadius: 8,
             fontFamily: 'var(--font-body)',
             fontSize: 14,
             lineHeight: 1.7,
-            color: 'var(--fg)',
+            color: idea.notes ? 'var(--fg)' : 'var(--fg-dim)',
             whiteSpace: 'pre-wrap',
+            fontStyle: idea.notes ? 'normal' : 'italic',
           }}
         >
-          {idea.notes}
+          {idea.notes ?? 'Nessuna nota — aprì Edit per aggiungerne una.'}
         </div>
       )}
     </div>
