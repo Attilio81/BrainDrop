@@ -37,7 +37,9 @@ def _extract_sync(url: str) -> dict | None:
         except Exception:
             transcript = next(iter(transcript_list))
         entries = transcript.fetch()
-        transcript_text = " ".join(e["text"] for e in entries)[:3000]
+        transcript_text = " ".join(
+            e.text if hasattr(e, "text") else e["text"] for e in entries
+        )[:3000]
     except Exception as e:
         logger.info(f"No transcript for {video_id}: {e}")
 
