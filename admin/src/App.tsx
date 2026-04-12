@@ -1,121 +1,135 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState, useEffect } from 'react'
+import type { Session } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
+import { LoginPage } from '@/components/LoginPage'
+import TabNav from '@/components/TabNav'
+import FilterBar from '@/components/FilterBar'
+import IdeaRow from '@/components/IdeaRow'
+import EditModal from '@/components/EditModal'
+import { useIdeas, useInboxCount } from '@/lib/queries'
+import type { Tab, Filters, Idea } from '@/types'
+import { DEFAULT_FILTERS } from '@/types'
 
-function App() {
-  const [count, setCount] = useState(0)
+function AdminShell() {
+  const [tab, setTab] = useState<Tab>('inbox')
+  const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
+  const [editingIdea, setEditingIdea] = useState<Idea | null>(null)
+
+  const { data: ideas = [], isLoading } = useIdeas(tab, filters)
+  const { data: inboxCount = 0 } = useInboxCount()
+
+  function handleTabChange(newTab: Tab) {
+    setTab(newTab)
+    setFilters(DEFAULT_FILTERS)
+  }
+
+  const availableTags = [...new Set(ideas.flatMap((i) => i.tags))].sort()
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+    <div style={{ minHeight: '100vh', background: 'var(--bg)' }}>
+      {/* TOP BAR */}
+      <div
+        style={{
+          background: 'var(--surface)',
+          borderBottom: '1px solid var(--border)',
+          display: 'flex',
+          alignItems: 'stretch',
+          height: 52,
+          paddingLeft: 24,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: 'var(--font-display)',
+            fontWeight: 800,
+            fontSize: 13,
+            letterSpacing: 3,
+            textTransform: 'uppercase',
+            color: 'var(--fg)',
+            display: 'flex',
+            alignItems: 'center',
+            marginRight: 32,
+          }}
         >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          BrainDrop
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
+        <TabNav
+          activeTab={tab}
+          inboxCount={inboxCount}
+          onTabChange={handleTabChange}
+        />
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', paddingRight: 16 }}>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            style={{
+              background: 'none',
+              border: '1px solid var(--border)',
+              borderRadius: 4,
+              color: 'var(--fg-muted)',
+              fontSize: 11,
+              padding: '3px 8px',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            Esci
+          </button>
         </div>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      {/* FILTER BAR */}
+      <FilterBar
+        filters={filters}
+        availableTags={availableTags}
+        onChange={setFilters}
+      />
+
+      {/* IDEA LIST */}
+      <div style={{ padding: '12px 16px' }}>
+        {isLoading && (
+          <p style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 12, padding: '24px 10px' }}>
+            Caricamento…
+          </p>
+        )}
+        {!isLoading && ideas.length === 0 && (
+          <p style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 12, padding: '24px 10px' }}>
+            Nessuna idea in questa vista.
+          </p>
+        )}
+        {ideas.map((idea) => (
+          <IdeaRow
+            key={idea.id}
+            idea={idea}
+            tab={tab}
+            onEdit={() => setEditingIdea(idea)}
+          />
+        ))}
+      </div>
+
+      {/* EDIT MODAL */}
+      <EditModal
+        idea={editingIdea}
+        onClose={() => setEditingIdea(null)}
+      />
+    </div>
   )
 }
 
-export default App
+export default function App() {
+  const [session, setSession] = useState<Session | null | undefined>(undefined)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  // Still loading auth state
+  if (session === undefined) return null
+
+  if (!session) return <LoginPage />
+
+  return <AdminShell />
+}
