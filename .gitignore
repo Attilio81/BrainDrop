@@ -14,3 +14,8 @@ venv/
 
 # Git worktrees
 .worktrees/
+
+# Admin panel
+admin/.env.local
+admin/node_modules/
+admin/dist/
