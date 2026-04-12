@@ -6,6 +6,18 @@ BrainDrop è il tuo secondo cervello personale via Telegram. Mandi un link, un p
 
 ---
 
+## 📸 Screenshot
+
+**Bot Telegram**
+
+![BrainDrop Bot](bOtImage.png)
+
+**Admin Panel**
+
+![BrainDrop Admin Panel](backend.png)
+
+---
+
 ## ✨ Come funziona
 
 ```

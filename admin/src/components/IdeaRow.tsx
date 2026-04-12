@@ -132,10 +132,10 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
           </div>
         </div>
 
-        {/* NOTES TOGGLE — sempre visibile */}
+        {/* EXPAND TOGGLE */}
         <button
           onClick={() => setNotesOpen(v => !v)}
-          title={notesOpen ? 'Chiudi note' : idea.notes ? 'Vedi note' : 'Nessuna nota'}
+          title={notesOpen ? 'Chiudi' : 'Espandi contenuto'}
           style={{
             background: notesOpen ? 'var(--accent-bg)' : 'transparent',
             border: `1px solid ${notesOpen ? '#c4b9f5' : 'var(--border2)'}`,
@@ -143,14 +143,13 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
             padding: '4px 8px',
             fontFamily: 'var(--font-mono)',
             fontSize: 11,
-            color: notesOpen ? 'var(--accent)' : idea.notes ? 'var(--fg-muted)' : 'var(--fg-dim)',
+            color: notesOpen ? 'var(--accent)' : 'var(--fg-muted)',
             cursor: 'pointer',
             transition: 'all 0.12s',
             flexShrink: 0,
-            opacity: idea.notes ? 1 : 0.4,
           }}
         >
-          📝
+          {notesOpen ? '▲' : '▼'}
         </button>
 
         {/* TIME */}
@@ -225,24 +224,76 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
         </div>
       </div>
 
-      {/* NOTES INLINE PANEL */}
+      {/* INLINE PANEL — summary + notes */}
       {notesOpen && (
         <div
           style={{
             margin: '0 12px 10px 64px',
-            padding: '12px 16px',
-            background: idea.notes ? 'var(--accent-bg)' : 'var(--surface2)',
-            border: `1px solid ${idea.notes ? '#c4b9f5' : 'var(--border2)'}`,
             borderRadius: 8,
-            fontFamily: 'var(--font-body)',
-            fontSize: 14,
-            lineHeight: 1.7,
-            color: idea.notes ? 'var(--fg)' : 'var(--fg-dim)',
-            whiteSpace: 'pre-wrap',
-            fontStyle: idea.notes ? 'normal' : 'italic',
+            border: '1px solid var(--border2)',
+            overflow: 'hidden',
           }}
         >
-          {idea.notes ?? 'Nessuna nota — aprì Edit per aggiungerne una.'}
+          {/* Summary */}
+          <div style={{ padding: '12px 16px', background: 'var(--surface2)' }}>
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10,
+                letterSpacing: '1.2px',
+                textTransform: 'uppercase',
+                color: 'var(--fg-dim)',
+                marginBottom: 7,
+              }}
+            >
+              Summary
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
+                lineHeight: 1.75,
+                color: 'var(--fg)',
+                whiteSpace: 'pre-wrap',
+              }}
+            >
+              {idea.summary}
+            </div>
+          </div>
+
+          {/* Note private */}
+          <div
+            style={{
+              padding: '12px 16px',
+              background: idea.notes ? 'var(--accent-bg)' : 'var(--surface2)',
+              borderTop: `1px solid ${idea.notes ? '#c4b9f5' : 'var(--border2)'}`,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10,
+                letterSpacing: '1.2px',
+                textTransform: 'uppercase',
+                color: idea.notes ? 'var(--accent)' : 'var(--fg-dim)',
+                marginBottom: 7,
+              }}
+            >
+              Note private
+            </div>
+            <div
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: 14,
+                lineHeight: 1.75,
+                color: idea.notes ? 'var(--fg)' : 'var(--fg-dim)',
+                whiteSpace: 'pre-wrap',
+                fontStyle: idea.notes ? 'normal' : 'italic',
+              }}
+            >
+              {idea.notes ?? 'Nessuna nota — aprì Edit per aggiungerne una.'}
+            </div>
+          </div>
         </div>
       )}
     </div>
