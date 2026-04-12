@@ -32,7 +32,10 @@ Output:
   self-contained — reader should need nothing else)
 - category: one of tech, programming, ai, crossfit, travel, food, business, personal, other
 - tags: up to 5 lowercase specific tags (prefer "llm" over "ai", "react" over "javascript")
-- source_url: original URL if present in the input
+- source_url: original URL if present in the input. If the content's primary subject is a
+  single GitHub repository (e.g. the post is specifically about github.com/user/repo), set
+  source_url to that repository URL instead. If multiple repos are mentioned, keep the
+  original input URL.
 - thumbnail_url: if found (e.g. from get_youtube_video_data)"""
 
 _MAX_RETRIES = 3
