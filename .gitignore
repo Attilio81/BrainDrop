@@ -19,3 +19,8 @@ venv/
 admin/.env.local
 admin/node_modules/
 admin/dist/
+
+# Dev tooling (non necessario nel repo)
+.claude/
+docs/superpowers/
+tests/

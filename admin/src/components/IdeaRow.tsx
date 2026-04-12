@@ -39,17 +39,17 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
-        padding: '10px 10px',
+        gap: 14,
+        padding: '11px 12px',
         borderRadius: 8,
         border: '1px solid transparent',
-        marginBottom: 4,
+        marginBottom: 2,
         transition: 'all 0.12s',
       }}
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLElement
-        el.style.background = '#111118'
-        el.style.borderColor = '#1e1e2c'
+        el.style.background = 'var(--surface)'
+        el.style.borderColor = 'var(--border)'
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget as HTMLElement
@@ -60,16 +60,16 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
       {/* THUMBNAIL */}
       <div
         style={{
-          width: 36,
-          height: 36,
-          borderRadius: 6,
-          background: '#1a1a26',
+          width: 38,
+          height: 38,
+          borderRadius: 8,
+          background: 'var(--surface2)',
           flexShrink: 0,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: 16,
-          border: '1px solid #222230',
+          fontSize: 17,
+          border: '1px solid var(--border)',
           overflow: 'hidden',
         }}
       >
@@ -93,14 +93,14 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{
-            fontFamily: 'DM Sans, sans-serif',
-            fontSize: 13,
+            fontFamily: 'var(--font-body)',
+            fontSize: 14,
             fontWeight: 500,
-            color: '#dddde8',
+            color: 'var(--fg)',
             whiteSpace: 'nowrap',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
-            marginBottom: 4,
+            marginBottom: 5,
           }}
         >
           {idea.title}
@@ -108,21 +108,22 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
         <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
           <span
             style={{
-              fontFamily: 'DM Mono, monospace',
-              fontSize: 9,
-              letterSpacing: 1,
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10,
+              letterSpacing: '0.8px',
               textTransform: 'uppercase',
-              padding: '2px 7px',
+              padding: '2px 8px',
               borderRadius: 4,
               background: catColors.bg,
               color: catColors.text,
               border: `1px solid ${catColors.border}`,
+              fontWeight: 500,
             }}
           >
             {idea.category}
           </span>
           {idea.tags.length > 0 && (
-            <span style={{ fontFamily: 'DM Mono, monospace', fontSize: 10, color: '#3a3a50' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--fg-dim)' }}>
               {idea.tags.map((t) => `#${t}`).join(' · ')}
             </span>
           )}
@@ -132,9 +133,9 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
       {/* TIME */}
       <div
         style={{
-          fontFamily: 'DM Mono, monospace',
-          fontSize: 10,
-          color: '#2e2e42',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 11,
+          color: 'var(--fg-dim)',
           flexShrink: 0,
         }}
       >
@@ -142,7 +143,7 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
       </div>
 
       {/* ACTIONS */}
-      <div style={{ display: 'flex', gap: 4, alignItems: 'center', flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexShrink: 0 }}>
         {tab === 'inbox' && (
           <button
             onClick={() => togglePublish.mutate(idea)}
@@ -205,21 +206,22 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
 
 function btnStyle(variant: 'green' | 'dim' | 'edit' | 'trash' | 'red'): CSSProperties {
   const base: CSSProperties = {
-    fontFamily: 'DM Mono, monospace',
-    fontSize: 10,
-    letterSpacing: '0.5px',
-    padding: '4px 10px',
+    fontFamily: 'var(--font-mono)',
+    fontSize: 11,
+    letterSpacing: '0.4px',
+    padding: '5px 12px',
     borderRadius: 5,
     border: 'none',
     cursor: 'pointer',
     transition: 'all 0.12s',
+    fontWeight: 500,
   }
   const styles: Record<typeof variant, CSSProperties> = {
-    green: { ...base, background: '#0f2a1a', color: '#4ade80', border: '1px solid #1a4a2a' },
-    dim:   { ...base, background: '#16162a', color: '#888',    border: '1px solid #222238' },
-    edit:  { ...base, background: '#16162a', color: '#888',    border: '1px solid #222238' },
-    trash: { ...base, background: 'transparent', color: '#444', border: '1px solid transparent', padding: '4px 6px' },
-    red:   { ...base, background: '#1a0a0a', color: '#ef4444', border: '1px solid #3a1a1a' },
+    green: { ...base, background: 'var(--green-bg)', color: 'var(--green)',   border: '1px solid #86efac' },
+    dim:   { ...base, background: 'var(--surface2)', color: 'var(--fg-muted)', border: '1px solid var(--border2)' },
+    edit:  { ...base, background: 'var(--accent-bg)', color: 'var(--accent)', border: '1px solid #c4b9f5' },
+    trash: { ...base, background: 'transparent', color: 'var(--fg-dim)', border: '1px solid transparent', padding: '5px 7px' },
+    red:   { ...base, background: 'var(--red-bg)', color: 'var(--red)', border: '1px solid #fca5a5' },
   }
   return styles[variant]
 }

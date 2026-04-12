@@ -65,13 +65,13 @@ export const SOURCE_TYPE_EMOJI: Record<SourceType, string> = {
 }
 
 export const CATEGORY_COLORS: Record<Category, { bg: string; text: string; border: string }> = {
-  ai:          { bg: '#1a1a30', text: '#a89fff', border: '#2a2a50' },
-  tech:        { bg: '#1a2030', text: '#60a5fa', border: '#2a3050' },
-  programming: { bg: '#1a1a2a', text: '#818cf8', border: '#2a2a40' },
-  crossfit:    { bg: '#1a2a1a', text: '#4ade80', border: '#2a4a2a' },
-  travel:      { bg: '#2a2010', text: '#fbbf24', border: '#4a3a10' },
-  food:        { bg: '#2a1a10', text: '#fb923c', border: '#4a2a10' },
-  business:    { bg: '#1a2020', text: '#34d399', border: '#2a3a30' },
-  personal:    { bg: '#2a1a20', text: '#f472b6', border: '#4a2a30' },
-  other:       { bg: '#1a1a1a', text: '#9ca3af', border: '#2a2a2a' },
+  ai:          { bg: '#ede9ff', text: '#5b47d4', border: '#c4b9f5' },
+  tech:        { bg: '#dbeafe', text: '#1d4ed8', border: '#93c5fd' },
+  programming: { bg: '#e0e7ff', text: '#4338ca', border: '#a5b4fc' },
+  crossfit:    { bg: '#dcfce7', text: '#15803d', border: '#86efac' },
+  travel:      { bg: '#fef9c3', text: '#a16207', border: '#fde047' },
+  food:        { bg: '#ffedd5', text: '#c2410c', border: '#fdba74' },
+  business:    { bg: '#d1fae5', text: '#065f46', border: '#6ee7b7' },
+  personal:    { bg: '#fce7f3', text: '#9d174d', border: '#f9a8d4' },
+  other:       { bg: '#f3f4f6', text: '#374151', border: '#d1d5db' },
 }

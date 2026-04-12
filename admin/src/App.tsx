@@ -7,6 +7,8 @@ import FilterBar from '@/components/FilterBar'
 import IdeaRow from '@/components/IdeaRow'
 import EditModal from '@/components/EditModal'
 import { useIdeas, useInboxCount } from '@/lib/queries'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import type { Tab, Filters, Idea } from '@/types'
 import { DEFAULT_FILTERS } from '@/types'
 
@@ -15,8 +17,20 @@ function AdminShell() {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS)
   const [editingIdea, setEditingIdea] = useState<Idea | null>(null)
 
+  const qc = useQueryClient()
   const { data: ideas = [], isLoading } = useIdeas(tab, filters)
   const { data: inboxCount = 0 } = useInboxCount()
+
+  async function handleClearAll() {
+    if (!window.confirm('Eliminare TUTTE le idee? Operazione irreversibile.')) return
+    const { error } = await supabase.from('ideas').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    if (error) {
+      toast.error('Errore durante la cancellazione')
+    } else {
+      qc.invalidateQueries({ queryKey: ['ideas'] })
+      toast.success('Database svuotato')
+    }
+  }
 
   function handleTabChange(newTab: Tab) {
     setTab(newTab)
@@ -42,7 +56,7 @@ function AdminShell() {
           style={{
             fontFamily: 'var(--font-display)',
             fontWeight: 800,
-            fontSize: 13,
+            fontSize: 14,
             letterSpacing: 3,
             textTransform: 'uppercase',
             color: 'var(--fg)',
@@ -58,7 +72,22 @@ function AdminShell() {
           inboxCount={inboxCount}
           onTabChange={handleTabChange}
         />
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', paddingRight: 16 }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8, paddingRight: 16 }}>
+          <button
+            onClick={handleClearAll}
+            style={{
+              background: 'none',
+              border: '1px solid var(--red)',
+              borderRadius: 4,
+              color: 'var(--red)',
+              fontSize: 12,
+              padding: '4px 10px',
+              cursor: 'pointer',
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            Svuota DB
+          </button>
           <button
             onClick={() => supabase.auth.signOut()}
             style={{
@@ -66,8 +95,8 @@ function AdminShell() {
               border: '1px solid var(--border)',
               borderRadius: 4,
               color: 'var(--fg-muted)',
-              fontSize: 11,
-              padding: '3px 8px',
+              fontSize: 12,
+              padding: '4px 10px',
               cursor: 'pointer',
               fontFamily: 'var(--font-body)',
             }}
@@ -87,12 +116,12 @@ function AdminShell() {
       {/* IDEA LIST */}
       <div style={{ padding: '12px 16px' }}>
         {isLoading && (
-          <p style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 12, padding: '24px 10px' }}>
+          <p style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 13, padding: '24px 10px' }}>
             Caricamento…
           </p>
         )}
         {!isLoading && ideas.length === 0 && (
-          <p style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 12, padding: '24px 10px' }}>
+          <p style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: 13, padding: '24px 10px' }}>
             Nessuna idea in questa vista.
           </p>
         )}

@@ -2,7 +2,7 @@
 
 > **Cattura tutto. Dimentica niente.**
 
-BrainDrop è il tuo secondo cervello personale via Telegram. Mandi un link, un post Instagram, una foto, una nota vocale o un'idea — lui la analizza, la arricchisce con AI e la salva nella tua knowledge base.
+BrainDrop è il tuo secondo cervello personale via Telegram. Mandi un link, un post Instagram, una foto, una nota vocale o un'idea — lui la analizza, la arricchisce con AI e la salva nella tua knowledge base. Un admin panel React ti permette di gestire, pubblicare e modificare tutto.
 
 ---
 
@@ -15,7 +15,9 @@ BrainDrop estrae il contenuto
         ↓
 DeepSeek R1 analizza e arricchisce
         ↓
-Salvato in Supabase, pronto da consultare
+Salvato in Supabase, pronto da gestire
+        ↓
+Admin panel React per pubblicare e modificare
 ```
 
 ---
@@ -48,12 +50,13 @@ Ogni entry riceve: **titolo in inglese**, **riassunto narrativo in italiano**, *
 | Instagram | instaloader |
 | YouTube | yt-dlp + youtube-transcript-api |
 | Database | Supabase (PostgreSQL + RLS) |
+| Admin panel | React 19 + Vite 5 + TanStack Query + shadcn/ui |
 
 ---
 
 ## 🚀 Setup
 
-### 1. Clona e installa
+### 1. Clona e installa (bot)
 
 ```bash
 git clone https://github.com/Attilio81/BrainDrop.git
@@ -61,12 +64,9 @@ cd BrainDrop
 pip install -r requirements.txt
 ```
 
-### 2. Variabili d'ambiente
+### 2. Variabili d'ambiente — bot
 
-```bash
-cp .env.example .env
-# Apri .env e compila tutti i valori
-```
+Crea il file `.env` nella root:
 
 | Variabile | Dove trovarla |
 |---|---|
@@ -79,19 +79,31 @@ cp .env.example .env
 | `SUPABASE_URL` | Supabase → Settings → API |
 | `SUPABASE_SERVICE_KEY` | Supabase → Settings → API → `service_role` |
 
-### 3. Supabase — esegui le migrazioni
+### 3. Variabili d'ambiente — admin panel
+
+Crea il file `admin/.env.local`:
+
+```env
+VITE_SUPABASE_URL=https://TUO_PROGETTO.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJ...la_tua_anon_key...
+```
+
+### 4. Supabase — esegui le migrazioni
 
 In **Supabase Dashboard → SQL Editor**, esegui in ordine:
 
 ```sql
--- 1. Crea la tabella ideas
+-- 1. Schema iniziale
 -- (incolla il contenuto di db/migrations/001_initial.sql)
 
--- 2. Aggiorna il vincolo source_type
+-- 2. Aggiornamento source_type
 -- (incolla il contenuto di db/migrations/002_phase2.sql)
+
+-- 3. Policy RLS per admin panel (utenti autenticati)
+-- (incolla il contenuto di db/migrations/003_admin_rls.sql)
 ```
 
-### 4. Avvia il bot
+### 5. Avvia il bot
 
 **Windows:** doppio click su `start.bat`
 
@@ -99,6 +111,19 @@ In **Supabase Dashboard → SQL Editor**, esegui in ordine:
 ```bash
 python -m bot.main
 ```
+
+### 6. Avvia l'admin panel
+
+**Windows:** doppio click su `start-admin.bat` (installa le dipendenze al primo avvio)
+
+**Terminale:**
+```bash
+cd admin
+npm install   # solo la prima volta
+npm run dev
+```
+
+Apri [http://localhost:5173](http://localhost:5173), inserisci la tua email e clicca il magic link.
 
 ---
 
@@ -111,6 +136,18 @@ python -m bot.main
 | `/publish_<id>` | Pubblica o nascondi un elemento |
 | `/delete_<id>` | Elimina (soft delete) |
 | `/clear` | 🗑 Svuota tutto il database |
+
+---
+
+## 🖥 Admin Panel
+
+Interfaccia React per gestire la knowledge base:
+
+- **Inbox** — idee salvate, da rivedere e pubblicare
+- **Published** — idee pubblicate, visibili al frontend
+- **Trash** — idee eliminate, ripristinabili o cancellabili definitivamente
+
+Funzionalità: filtro per testo / categoria / tag, edit modale con titolo, summary, categoria, tag e note private, pulsante Svuota DB.
 
 ---
 
@@ -134,10 +171,17 @@ BrainDrop/
 │   ├── models.py             # Modelli Pydantic
 │   └── migrations/
 │       ├── 001_initial.sql   # Schema iniziale
-│       └── 002_phase2.sql    # Aggiornamento source_type
-├── tests/                    # 36 test, tutti in verde ✅
-├── start.bat                 # Avvio rapido Windows
-├── .env.example
+│       ├── 002_phase2.sql    # Aggiornamento source_type
+│       └── 003_admin_rls.sql # Policy RLS per admin panel
+├── admin/                    # Admin panel React+Vite
+│   ├── src/
+│   │   ├── App.tsx           # Shell principale + auth guard
+│   │   ├── components/       # TabNav, FilterBar, IdeaRow, EditModal, LoginPage
+│   │   ├── lib/              # Supabase client + TanStack Query hooks
+│   │   └── types.ts          # Tipi condivisi
+│   └── .env.local            # Credenziali Supabase (non versionato)
+├── start.bat                 # Avvio rapido bot (Windows)
+├── start-admin.bat           # Avvio rapido admin panel (Windows)
 └── Dockerfile
 ```
 
@@ -147,6 +191,6 @@ BrainDrop/
 
 - ✅ **Phase 1** — Testo, URL, bot Telegram, Supabase
 - ✅ **Phase 2** — Instagram, foto, note vocali, YouTube, riassunti in italiano
-- ⬜ **Phase 3** — Admin panel
+- ✅ **Phase 3** — Admin panel React (inbox / published / trash / edit)
 - ⬜ **Phase 4** — Frontend pubblico
 - ⬜ **Phase 5** — Ricerca semantica (pgvector)

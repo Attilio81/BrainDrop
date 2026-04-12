@@ -12,7 +12,6 @@ export default function FilterBar({ filters, availableTags, onChange }: Props) {
   const [inputValue, setInputValue] = useState(filters.text)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Sync local input when filters reset externally (tab change)
   useEffect(() => { setInputValue(filters.text) }, [filters.text])
 
   function handleTextChange(value: string) {
@@ -38,7 +37,7 @@ export default function FilterBar({ filters, availableTags, onChange }: Props) {
     <div
       style={{
         background: 'var(--surface)',
-        borderBottom: '1px solid #1a1a22',
+        borderBottom: '1px solid var(--border)',
         padding: '10px 24px',
         display: 'flex',
         gap: 10,
@@ -55,11 +54,11 @@ export default function FilterBar({ filters, availableTags, onChange }: Props) {
           background: 'var(--surface2)',
           border: '1px solid var(--border2)',
           borderRadius: 6,
-          padding: '6px 12px',
-          color: '#aaa',
-          fontFamily: 'DM Sans, sans-serif',
-          fontSize: 12,
-          width: 220,
+          padding: '7px 13px',
+          color: 'var(--fg)',
+          fontFamily: 'var(--font-body)',
+          fontSize: 13,
+          width: 240,
           outline: 'none',
         }}
       />
@@ -71,10 +70,10 @@ export default function FilterBar({ filters, availableTags, onChange }: Props) {
           background: 'var(--surface2)',
           border: '1px solid var(--border2)',
           borderRadius: 6,
-          padding: '6px 10px',
-          color: filters.category ? 'var(--text)' : 'var(--text-muted)',
-          fontFamily: 'DM Mono, monospace',
-          fontSize: 11,
+          padding: '7px 10px',
+          color: filters.category ? 'var(--fg)' : 'var(--fg-muted)',
+          fontFamily: 'var(--font-mono)',
+          fontSize: 12,
           outline: 'none',
           cursor: 'pointer',
         }}
@@ -93,14 +92,15 @@ export default function FilterBar({ filters, availableTags, onChange }: Props) {
             onClick={() => toggleTag(tag)}
             style={{
               background: isActive ? 'var(--accent-bg)' : 'var(--surface2)',
-              border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border2)'}`,
+              border: `1px solid ${isActive ? '#c4b9f5' : 'var(--border2)'}`,
               borderRadius: 20,
-              padding: '3px 10px',
-              fontFamily: 'DM Mono, monospace',
-              fontSize: 10,
-              color: isActive ? '#a89fff' : 'var(--text-muted)',
+              padding: '4px 12px',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              color: isActive ? 'var(--accent)' : 'var(--fg-muted)',
               cursor: 'pointer',
               transition: 'all 0.12s',
+              fontWeight: isActive ? 500 : 400,
             }}
           >
             #{tag}
