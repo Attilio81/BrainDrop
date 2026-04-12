@@ -132,6 +132,45 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
           </div>
         </div>
 
+        {/* SOURCE LINK */}
+        {idea.source_url && (
+          <a
+            href={idea.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={idea.source_url}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border2)',
+              borderRadius: 5,
+              padding: '4px 8px',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              color: 'var(--fg-muted)',
+              cursor: 'pointer',
+              textDecoration: 'none',
+              flexShrink: 0,
+              transition: 'all 0.12s',
+              lineHeight: 1,
+            }}
+            onMouseEnter={(e) => {
+              const el = e.currentTarget as HTMLAnchorElement
+              el.style.borderColor = '#93c5fd'
+              el.style.color = '#3b82f6'
+              el.style.background = '#dbeafe30'
+            }}
+            onMouseLeave={(e) => {
+              const el = e.currentTarget as HTMLAnchorElement
+              el.style.borderColor = 'var(--border2)'
+              el.style.color = 'var(--fg-muted)'
+              el.style.background = 'transparent'
+            }}
+          >
+            ↗
+          </a>
+        )}
+
         {/* EXPAND TOGGLE */}
         <button
           onClick={() => setNotesOpen(v => !v)}
@@ -260,6 +299,53 @@ export default function IdeaRow({ idea, tab, onEdit }: Props) {
               {idea.summary}
             </div>
           </div>
+
+          {/* Source URL */}
+          {idea.source_url && (
+            <div
+              style={{
+                padding: '10px 16px',
+                background: 'var(--surface2)',
+                borderTop: '1px solid var(--border2)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  letterSpacing: '1.2px',
+                  textTransform: 'uppercase',
+                  color: 'var(--fg-dim)',
+                  flexShrink: 0,
+                }}
+              >
+                Sorgente
+              </div>
+              <a
+                href={idea.source_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 12,
+                  color: '#3b82f6',
+                  textDecoration: 'none',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  flex: 1,
+                  minWidth: 0,
+                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'underline' }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.textDecoration = 'none' }}
+              >
+                {idea.source_url}
+              </a>
+            </div>
+          )}
 
           {/* Note private */}
           <div
