@@ -78,6 +78,17 @@ class SupabaseClient:
         res = await self._db.table("ideas").delete().neq("id", "00000000-0000-0000-0000-000000000000").execute()
         return len(res.data)
 
+    async def find_by_source_url(self, url: str) -> Idea | None:
+        res = (
+            await self._db.table("ideas")
+            .select("*")
+            .eq("source_url", url)
+            .is_("deleted_at", "null")
+            .limit(1)
+            .execute()
+        )
+        return Idea(**res.data[0]) if res.data else None
+
     async def resolve_short_id(self, short_id: str) -> str:
         res = (
             await self._db.table("ideas")

@@ -121,6 +121,19 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         return
 
     text = update.message.text.strip()
+
+    # Duplicate check — skip analysis if URL already saved
+    if URL_RE.match(text) or _INSTAGRAM_RE.match(text) or _YOUTUBE_RE.match(text):
+        existing = await db.find_by_source_url(text)
+        if existing:
+            short_id = str(existing.id)[:8]
+            await update.message.reply_text(
+                f"⚠️ Link già salvato: *{existing.title}*\n"
+                f"📂 {existing.category} | /publish_{short_id}",
+                parse_mode="Markdown",
+            )
+            return
+
     processing_msg = await update.message.reply_text("⏳ Elaborazione in corso...")
 
     # Detect special media URLs and extract content
