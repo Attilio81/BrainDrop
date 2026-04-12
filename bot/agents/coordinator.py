@@ -28,8 +28,12 @@ Processing rules:
 
 Output:
 - title: concise English title, max 10 words
-- summary: narrative prose IN ITALIAN covering ALL content (5-10 sentences, no bullet points,
-  self-contained — reader should need nothing else)
+- summary: IN ITALIAN, self-contained — reader must understand everything without seeing the original.
+  Format rules:
+  • If the content is a LIST of items (repos, tools, resources, steps, tips): use a bullet list (–)
+    enumerating EVERY single item by name. Include the URL for each repo or link. Do not omit any item.
+  • If the content is narrative or explanatory: write flowing prose (5-10 sentences).
+  Never summarize a list with vague phrases like "various tools" or "many repos" — name them all.
 - category: one of tech, programming, ai, crossfit, travel, food, business, personal, other
 - tags: up to 5 lowercase specific tags (prefer "llm" over "ai", "react" over "javascript")
 - source_url: original URL if present in the input. If the content's primary subject is a
