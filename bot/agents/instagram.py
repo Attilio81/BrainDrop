@@ -3,6 +3,7 @@ import base64
 import logging
 import re
 import tempfile
+import time
 from pathlib import Path
 
 import httpx
@@ -35,14 +36,22 @@ def _ocr_image(image_path: Path, api_key: str) -> str:
         ]}],
         "max_tokens": 1024,
     }
-    with httpx.Client(timeout=30) as client:
-        resp = client.post(
-            "https://api.openai.com/v1/chat/completions",
-            json=payload,
-            headers={"Authorization": f"Bearer {api_key}"},
-        )
+    for attempt in range(3):
+        with httpx.Client(timeout=30) as client:
+            resp = client.post(
+                "https://api.openai.com/v1/chat/completions",
+                json=payload,
+                headers={"Authorization": f"Bearer {api_key}"},
+            )
+        if resp.status_code == 429:
+            wait = 2 ** attempt + 1
+            logger.warning(f"OpenAI 429 rate limit, retrying in {wait}s...")
+            time.sleep(wait)
+            continue
         resp.raise_for_status()
-    return resp.json()["choices"][0]["message"]["content"].strip()
+        return resp.json()["choices"][0]["message"]["content"].strip()
+    resp.raise_for_status()  # raise after exhausting retries
+    return ""
 
 
 def _extract_sync(url: str) -> dict | None:
@@ -88,6 +97,8 @@ def _extract_sync(url: str) -> dict | None:
             image_urls = []  # Reel — no images, use caption only
 
         for i, img_url in enumerate(image_urls):
+            if i > 0:
+                time.sleep(0.5)  # avoid OpenAI rate limit on caroselli with many slides
             try:
                 with httpx.Client(timeout=30) as client:
                     r = client.get(img_url)
