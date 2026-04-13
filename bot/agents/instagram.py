@@ -59,6 +59,7 @@ def _transcribe_reel(video_url: str, api_key: str) -> str:
 
     Returns transcript text, or empty string on any failure.
     """
+    tmp_path: Path | None = None
     try:
         with httpx.Client(timeout=60) as client:
             r = client.get(video_url)
@@ -69,23 +70,23 @@ def _transcribe_reel(video_url: str, api_key: str) -> str:
             f.write(video_bytes)
             tmp_path = Path(f.name)
 
-        try:
-            with httpx.Client(timeout=120) as client:
-                with tmp_path.open("rb") as audio_file:
-                    resp = client.post(
-                        "https://api.openai.com/v1/audio/transcriptions",
-                        headers={"Authorization": f"Bearer {api_key}"},
-                        data={"model": "whisper-1"},
-                        files={"file": ("reel.mp4", audio_file, "video/mp4")},
-                    )
-                resp.raise_for_status()
-                return resp.json().get("text", "").strip()
-        finally:
-            tmp_path.unlink(missing_ok=True)
+        with httpx.Client(timeout=120) as client:
+            with tmp_path.open("rb") as audio_file:
+                resp = client.post(
+                    "https://api.openai.com/v1/audio/transcriptions",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    data={"model": "whisper-1"},
+                    files={"file": ("reel.mp4", audio_file, "audio/mp4")},
+                )
+            resp.raise_for_status()
+            return resp.json().get("text", "").strip()
 
     except Exception as e:
         logger.warning(f"Whisper transcription failed for reel: {e}")
         return ""
+    finally:
+        if tmp_path is not None:
+            tmp_path.unlink(missing_ok=True)
 
 
 def _extract_sync(url: str) -> dict | None:
