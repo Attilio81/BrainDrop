@@ -39,7 +39,7 @@ Admin panel React per cercare, pubblicare e modificare
 | Input | Cosa succede |
 |---|---|
 | 🔗 **URL / articolo** | Scraping (Firecrawl) → entry strutturata |
-| 📸 **Post Instagram** | Caption + OCR di ogni slide del carosello (GPT-4o-mini) → testo completo |
+| 📸 **Post Instagram** | Caption + OCR di ogni slide del carosello (GPT-4o-mini); Reel: trascrizione audio (Whisper) → testo completo |
 | ▶️ **Video YouTube** | Metadati + trascrizione automatica → riassunto |
 | 🖼 **Foto Telegram** | Descrizione visiva + OCR (GPT-4o-mini) → testo |
 | 🎙 **Nota vocale** | Trascrizione (OpenAI Whisper) → testo |
@@ -60,7 +60,7 @@ Ogni entry riceve: **titolo in inglese**, **riassunto narrativo in italiano**, *
 | Web search | Tavily (last resort) |
 | Vision / OCR | GPT-4o-mini (OpenAI) |
 | Voice | Whisper (OpenAI) |
-| Instagram | instaloader |
+| Instagram | instaloader + yt-dlp (audio reel) |
 | YouTube | Agno YouTubeTools (trascrizioni + metadata) |
 | Database | Supabase (PostgreSQL + pgvector + RLS) |
 | Admin panel | React 19 + Vite 5 + TanStack Query + shadcn/ui |
@@ -184,7 +184,7 @@ BrainDrop/
 │   ├── agents/
 │   │   ├── coordinator.py    # Agno agent — DeepSeek V3 + Firecrawl + YouTubeTools (Tavily last resort)
 │   │   ├── embeddings.py     # OpenAI text-embedding-3-small (Phase 5)
-│   │   ├── instagram.py      # instaloader + GPT-4o-mini OCR (retry su rate limit)
+│   │   ├── instagram.py      # instaloader + GPT-4o-mini OCR (caroselli) + yt-dlp/Whisper (reel audio)
 │   │   ├── photo.py          # GPT-4o-mini Vision
 │   │   ├── voice.py          # OpenAI Whisper
 │   │   ├── youtube.py        # yt-dlp (metadata fallback)
@@ -218,7 +218,7 @@ BrainDrop/
 ## 🛣 Roadmap
 
 - ✅ **Phase 1** — Testo, URL, bot Telegram, Supabase
-- ✅ **Phase 2** — Instagram, foto, note vocali, YouTube, riassunti in italiano
-- ✅ **Phase 3** — Admin panel React (inbox / published / trash / edit)
+- ✅ **Phase 2** — Foto, note vocali (Whisper)
+- ✅ **Phase 3** — Instagram (OCR caroselli + trascrizione audio reel), YouTube, admin panel React
 - ✅ **Phase 5** — Ricerca semantica (pgvector + embedding per ogni idea)
 - ⬜ **Phase 4** — Frontend pubblico
