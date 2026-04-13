@@ -116,6 +116,7 @@ def _extract_sync(url: str) -> dict | None:
     caption = post.caption or ""
     thumbnail_url = post.url
     slide_texts: list[str] = []
+    transcript: str = ""
 
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir_path = Path(tmpdir)
@@ -129,7 +130,8 @@ def _extract_sync(url: str) -> dict | None:
         elif not post.is_video:
             image_urls = [post.url]
         else:
-            image_urls = []  # Reel — no images, use caption only
+            image_urls = []  # Reel — no images
+            transcript = _transcribe_reel(post.video_url, api_key)
 
         for i, img_url in enumerate(image_urls):
             if i > 0:
@@ -150,6 +152,8 @@ def _extract_sync(url: str) -> dict | None:
     if caption:
         parts.append(f"Caption: {caption}")
     parts.extend(slide_texts)
+    if transcript:
+        parts.append(f"Transcript:\n{transcript}")
 
     if not parts:
         logger.warning(f"No content extracted from {shortcode}")

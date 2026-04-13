@@ -125,3 +125,42 @@ def test_transcribe_reel_returns_empty_on_whisper_error(mock_settings):
         result = _transcribe_reel("https://cdn.instagram.com/reel.mp4", "fake-key")
 
     assert result == ""
+
+
+async def test_extract_reel_includes_transcript(mock_settings):
+    from bot.agents.instagram import extract
+
+    mock_post = MagicMock()
+    mock_post.caption = "Watch this!"
+    mock_post.url = "https://cdn.instagram.com/thumb.jpg"
+    mock_post.video_url = "https://cdn.instagram.com/reel.mp4"
+    mock_post.typename = "GraphVideo"
+    mock_post.is_video = True
+
+    with patch("bot.agents.instagram.instaloader.Post.from_shortcode", return_value=mock_post), \
+         patch("bot.agents.instagram._transcribe_reel", return_value="Tip 1. Tip 2. Tip 3."):
+        result = await extract("https://www.instagram.com/reel/ABC123xyz/")
+
+    assert result is not None
+    assert "Caption: Watch this!" in result["text"]
+    assert "Transcript:" in result["text"]
+    assert "Tip 1. Tip 2. Tip 3." in result["text"]
+
+
+async def test_extract_reel_falls_back_to_caption_when_transcript_empty(mock_settings):
+    from bot.agents.instagram import extract
+
+    mock_post = MagicMock()
+    mock_post.caption = "Watch this!"
+    mock_post.url = "https://cdn.instagram.com/thumb.jpg"
+    mock_post.video_url = "https://cdn.instagram.com/reel.mp4"
+    mock_post.typename = "GraphVideo"
+    mock_post.is_video = True
+
+    with patch("bot.agents.instagram.instaloader.Post.from_shortcode", return_value=mock_post), \
+         patch("bot.agents.instagram._transcribe_reel", return_value=""):
+        result = await extract("https://www.instagram.com/reel/ABC123xyz/")
+
+    assert result is not None
+    assert "Caption: Watch this!" in result["text"]
+    assert "Transcript:" not in result["text"]
