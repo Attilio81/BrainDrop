@@ -54,6 +54,40 @@ def _ocr_image(image_path: Path, api_key: str) -> str:
     return ""
 
 
+def _transcribe_reel(video_url: str, api_key: str) -> str:
+    """Download a reel video and transcribe its audio with Whisper.
+
+    Returns transcript text, or empty string on any failure.
+    """
+    try:
+        with httpx.Client(timeout=60) as client:
+            r = client.get(video_url)
+            r.raise_for_status()
+            video_bytes = r.content
+
+        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
+            f.write(video_bytes)
+            tmp_path = Path(f.name)
+
+        try:
+            with httpx.Client(timeout=120) as client:
+                with tmp_path.open("rb") as audio_file:
+                    resp = client.post(
+                        "https://api.openai.com/v1/audio/transcriptions",
+                        headers={"Authorization": f"Bearer {api_key}"},
+                        data={"model": "whisper-1"},
+                        files={"file": ("reel.mp4", audio_file, "video/mp4")},
+                    )
+                resp.raise_for_status()
+                return resp.json().get("text", "").strip()
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    except Exception as e:
+        logger.warning(f"Whisper transcription failed for reel: {e}")
+        return ""
+
+
 def _extract_sync(url: str) -> dict | None:
     shortcode = _get_shortcode(url)
     if not shortcode:
