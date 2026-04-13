@@ -71,12 +71,30 @@ async def test_extract_success_returns_correct_structure(mock_settings):
     assert "Slide 1:" in result["text"]
 
 
+def _make_ydl_mock(opts, audio_bytes=b"fake-audio-bytes", ext="m4a"):
+    """Build a yt_dlp.YoutubeDL mock that writes a fake audio file and returns info."""
+    mock_ydl = MagicMock()
+    mock_ydl.__enter__ = MagicMock(return_value=mock_ydl)
+    mock_ydl.__exit__ = MagicMock(return_value=False)
+
+    def fake_extract_info(url, download=True):
+        from pathlib import Path
+        outtmpl = opts["outtmpl"].replace("%(ext)s", ext)
+        Path(outtmpl).write_bytes(audio_bytes)
+        return {"ext": ext}
+
+    mock_ydl.extract_info = fake_extract_info
+    return mock_ydl
+
+
 def test_transcribe_reel_returns_text_on_success(mock_settings):
     from bot.agents.instagram import _transcribe_reel
 
-    mock_download_resp = MagicMock()
-    mock_download_resp.raise_for_status = MagicMock()
-    mock_download_resp.content = b"fake-mp4-bytes"
+    captured_opts = {}
+
+    def fake_ydl_init(opts):
+        captured_opts.update(opts)
+        return _make_ydl_mock(opts)
 
     mock_whisper_resp = MagicMock()
     mock_whisper_resp.raise_for_status = MagicMock()
@@ -85,11 +103,11 @@ def test_transcribe_reel_returns_text_on_success(mock_settings):
     mock_client = MagicMock()
     mock_client.__enter__ = MagicMock(return_value=mock_client)
     mock_client.__exit__ = MagicMock(return_value=False)
-    mock_client.get = MagicMock(return_value=mock_download_resp)
     mock_client.post = MagicMock(return_value=mock_whisper_resp)
 
-    with patch("bot.agents.instagram.httpx.Client", return_value=mock_client):
-        result = _transcribe_reel("https://cdn.instagram.com/reel.mp4", "fake-key")
+    with patch("bot.agents.instagram.yt_dlp.YoutubeDL", side_effect=fake_ydl_init), \
+         patch("bot.agents.instagram.httpx.Client", return_value=mock_client):
+        result = _transcribe_reel("https://www.instagram.com/reel/ABC123/", "fake-key")
 
     assert result == "First tip. Second tip."
 
@@ -97,13 +115,13 @@ def test_transcribe_reel_returns_text_on_success(mock_settings):
 def test_transcribe_reel_returns_empty_on_download_error(mock_settings):
     from bot.agents.instagram import _transcribe_reel
 
-    mock_client = MagicMock()
-    mock_client.__enter__ = MagicMock(return_value=mock_client)
-    mock_client.__exit__ = MagicMock(return_value=False)
-    mock_client.get = MagicMock(side_effect=Exception("connection error"))
+    mock_ydl = MagicMock()
+    mock_ydl.__enter__ = MagicMock(return_value=mock_ydl)
+    mock_ydl.__exit__ = MagicMock(return_value=False)
+    mock_ydl.extract_info = MagicMock(side_effect=Exception("yt-dlp download error"))
 
-    with patch("bot.agents.instagram.httpx.Client", return_value=mock_client):
-        result = _transcribe_reel("https://cdn.instagram.com/reel.mp4", "fake-key")
+    with patch("bot.agents.instagram.yt_dlp.YoutubeDL", return_value=mock_ydl):
+        result = _transcribe_reel("https://www.instagram.com/reel/ABC123/", "fake-key")
 
     assert result == ""
 
@@ -111,18 +129,20 @@ def test_transcribe_reel_returns_empty_on_download_error(mock_settings):
 def test_transcribe_reel_returns_empty_on_whisper_error(mock_settings):
     from bot.agents.instagram import _transcribe_reel
 
-    mock_download_resp = MagicMock()
-    mock_download_resp.raise_for_status = MagicMock()
-    mock_download_resp.content = b"fake-mp4-bytes"
+    captured_opts = {}
+
+    def fake_ydl_init(opts):
+        captured_opts.update(opts)
+        return _make_ydl_mock(opts)
 
     mock_client = MagicMock()
     mock_client.__enter__ = MagicMock(return_value=mock_client)
     mock_client.__exit__ = MagicMock(return_value=False)
-    mock_client.get = MagicMock(return_value=mock_download_resp)
     mock_client.post = MagicMock(side_effect=Exception("whisper error"))
 
-    with patch("bot.agents.instagram.httpx.Client", return_value=mock_client):
-        result = _transcribe_reel("https://cdn.instagram.com/reel.mp4", "fake-key")
+    with patch("bot.agents.instagram.yt_dlp.YoutubeDL", side_effect=fake_ydl_init), \
+         patch("bot.agents.instagram.httpx.Client", return_value=mock_client):
+        result = _transcribe_reel("https://www.instagram.com/reel/ABC123/", "fake-key")
 
     assert result == ""
 

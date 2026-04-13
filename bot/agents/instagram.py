@@ -8,6 +8,7 @@ from pathlib import Path
 
 import httpx
 import instaloader
+import yt_dlp
 
 from bot.config import get_settings
 
@@ -54,39 +55,44 @@ def _ocr_image(image_path: Path, api_key: str) -> str:
     return ""
 
 
-def _transcribe_reel(video_url: str, api_key: str) -> str:
-    """Download a reel video and transcribe its audio with Whisper.
+def _transcribe_reel(reel_url: str, api_key: str) -> str:
+    """Download the audio-only stream of an Instagram Reel and transcribe with Whisper.
 
+    Uses yt-dlp to fetch the bestaudio format (m4a, typically <5 MB) so the file
+    stays well within Whisper's 25 MB limit without needing ffmpeg.
     Returns transcript text, or empty string on any failure.
     """
-    tmp_path: Path | None = None
     try:
-        with httpx.Client(timeout=60) as client:
-            r = client.get(video_url)
-            r.raise_for_status()
-            video_bytes = r.content
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ydl_opts = {
+                "format": "bestaudio[vcodec=none]/bestaudio",
+                "outtmpl": str(Path(tmpdir) / "reel.%(ext)s"),
+                "quiet": True,
+                "no_warnings": True,
+            }
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(reel_url, download=True)
+                ext = info.get("ext", "m4a")
 
-        with tempfile.NamedTemporaryFile(suffix=".mp4", delete=False) as f:
-            f.write(video_bytes)
-            tmp_path = Path(f.name)
+            downloaded = next(Path(tmpdir).glob(f"reel.{ext}"), None)
+            if downloaded is None:
+                logger.warning("yt-dlp produced no output file for reel")
+                return ""
 
-        with httpx.Client(timeout=120) as client:
-            with tmp_path.open("rb") as audio_file:
-                resp = client.post(
-                    "https://api.openai.com/v1/audio/transcriptions",
-                    headers={"Authorization": f"Bearer {api_key}"},
-                    data={"model": "whisper-1"},
-                    files={"file": ("reel.mp4", audio_file, "audio/mp4")},
-                )
-            resp.raise_for_status()
-            return resp.json().get("text", "").strip()
+            with httpx.Client(timeout=120) as client:
+                with downloaded.open("rb") as audio_file:
+                    resp = client.post(
+                        "https://api.openai.com/v1/audio/transcriptions",
+                        headers={"Authorization": f"Bearer {api_key}"},
+                        data={"model": "whisper-1"},
+                        files={"file": (f"reel.{ext}", audio_file, f"audio/{ext}")},
+                    )
+                resp.raise_for_status()
+                return resp.json().get("text", "").strip()
 
     except Exception as e:
         logger.warning(f"Whisper transcription failed for reel: {e}")
         return ""
-    finally:
-        if tmp_path is not None:
-            tmp_path.unlink(missing_ok=True)
 
 
 def _extract_sync(url: str) -> dict | None:
@@ -131,7 +137,7 @@ def _extract_sync(url: str) -> dict | None:
             image_urls = [post.url]
         else:
             image_urls = []  # Reel — no images
-            transcript = _transcribe_reel(post.video_url, api_key)
+            transcript = _transcribe_reel(url, api_key)
 
         for i, img_url in enumerate(image_urls):
             if i > 0:
