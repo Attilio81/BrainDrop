@@ -5,6 +5,14 @@ from supabase import acreate_client, AsyncClient
 from db.models import Idea, IdeaCreate
 
 
+def _short_id_range(short_id: str) -> tuple[str, str]:
+    """Return (lo, hi) UUID bounds matching any UUID starting with short_id."""
+    return (
+        f"{short_id}-0000-0000-0000-000000000000",
+        f"{short_id}-ffff-ffff-ffff-ffffffffffff",
+    )
+
+
 class SupabaseClient:
     def __init__(self, supabase: AsyncClient):
         self._db = supabase
@@ -42,11 +50,12 @@ class SupabaseClient:
         return [Idea(**row) for row in res.data]
 
     async def toggle_publish(self, short_id: str) -> Idea:
-        # Fetch current state
+        lo, hi = _short_id_range(short_id)
         res = (
             await self._db.table("ideas")
             .select("id, published")
-            .filter("id::text", "like", f"{short_id}%")
+            .gte("id", lo)
+            .lte("id", hi)
             .execute()
         )
         row = res.data[0]
@@ -60,17 +69,20 @@ class SupabaseClient:
         res2 = (
             await self._db.table("ideas")
             .update(update_data)
-            .filter("id::text", "like", f"{short_id}%")
+            .gte("id", lo)
+            .lte("id", hi)
             .select("*")
             .execute()
         )
         return Idea(**res2.data[0])
 
     async def soft_delete(self, short_id: str) -> None:
+        lo, hi = _short_id_range(short_id)
         await (
             self._db.table("ideas")
             .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
-            .filter("id::text", "like", f"{short_id}%")
+            .gte("id", lo)
+            .lte("id", hi)
             .execute()
         )
 
@@ -100,10 +112,12 @@ class SupabaseClient:
         )
 
     async def resolve_short_id(self, short_id: str) -> str:
+        lo, hi = _short_id_range(short_id)
         res = (
             await self._db.table("ideas")
             .select("id")
-            .filter("id::text", "like", f"{short_id}%")
+            .gte("id", lo)
+            .lte("id", hi)
             .execute()
         )
         return res.data[0]["id"]
