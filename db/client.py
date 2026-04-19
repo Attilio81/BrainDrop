@@ -58,22 +58,17 @@ class SupabaseClient:
             .lte("id", hi)
             .execute()
         )
-        row = res.data[0]
-        new_published = not row["published"]
+        full_id = res.data[0]["id"]
+        new_published = not res.data[0]["published"]
         update_data: dict = {"published": new_published}
         if new_published:
             update_data["published_at"] = datetime.now(timezone.utc).isoformat()
         else:
             update_data["published_at"] = None
 
-        res2 = (
-            await self._db.table("ideas")
-            .update(update_data)
-            .select("*")
-            .gte("id", lo)
-            .lte("id", hi)
-            .execute()
-        )
+        await self._db.table("ideas").update(update_data).eq("id", full_id).execute()
+
+        res2 = await self._db.table("ideas").select("*").eq("id", full_id).execute()
         return Idea(**res2.data[0])
 
     async def soft_delete(self, short_id: str) -> None:
