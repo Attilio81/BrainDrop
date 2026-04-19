@@ -46,7 +46,7 @@ class SupabaseClient:
         res = (
             await self._db.table("ideas")
             .select("id, published")
-            .like("id", f"{short_id}%")
+            .filter("id::text", "like", f"{short_id}%")
             .execute()
         )
         row = res.data[0]
@@ -60,7 +60,7 @@ class SupabaseClient:
         res2 = (
             await self._db.table("ideas")
             .update(update_data)
-            .like("id", f"{short_id}%")
+            .filter("id::text", "like", f"{short_id}%")
             .select("*")
             .execute()
         )
@@ -70,7 +70,7 @@ class SupabaseClient:
         await (
             self._db.table("ideas")
             .update({"deleted_at": datetime.now(timezone.utc).isoformat()})
-            .like("id", f"{short_id}%")
+            .filter("id::text", "like", f"{short_id}%")
             .execute()
         )
 
@@ -103,7 +103,7 @@ class SupabaseClient:
         res = (
             await self._db.table("ideas")
             .select("id")
-            .like("id", f"{short_id}%")
+            .filter("id::text", "like", f"{short_id}%")
             .execute()
         )
         return res.data[0]["id"]
