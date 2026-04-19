@@ -3,7 +3,8 @@ import logging
 from dotenv import load_dotenv
 load_dotenv()  # Export .env values into os.environ so third-party libs (Tavily, DeepSeek) can read them
 
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
 import bot.handlers as handlers
 from bot.agents.coordinator import Coordinator
@@ -15,6 +16,10 @@ logging.basicConfig(
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
+
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error("Unhandled exception in PTB dispatcher", exc_info=context.error)
 
 
 async def post_init(application):
@@ -34,9 +39,15 @@ def main() -> None:
     app = (
         ApplicationBuilder()
         .token(settings.TELEGRAM_BOT_TOKEN.get_secret_value())
+        .connect_timeout(10)
+        .read_timeout(30)
+        .write_timeout(30)
+        .pool_timeout(10)
         .post_init(post_init)
         .build()
     )
+
+    app.add_error_handler(error_handler)
 
     # Static commands
     app.add_handler(CommandHandler("start", handlers.handle_start))

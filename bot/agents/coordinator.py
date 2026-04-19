@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+import httpx
 from agno.agent import Agent
 from agno.models.deepseek import DeepSeek
 from agno.tools.tavily import TavilyTools
@@ -46,6 +47,18 @@ Output:
 - thumbnail_url: if found (e.g. from get_youtube_video_data)"""
 
 _MAX_RETRIES = 3
+_GITHUB_PREFIX = "https://github.com/"
+
+
+async def _verify_url(url: str) -> bool:
+    """Return True if the URL responds with a 2xx or 3xx status code."""
+    try:
+        async with httpx.AsyncClient(follow_redirects=True, timeout=8) as client:
+            resp = await client.head(url)
+            return resp.status_code < 400
+    except Exception as e:
+        logger.warning(f"URL verification failed for {url}: {e}")
+        return False
 
 
 class Coordinator:
@@ -68,7 +81,12 @@ class Coordinator:
                 response = await self._agent.arun(text)
                 if not isinstance(response.content, EnrichedIdea):
                     raise ValueError(f"Agent returned unexpected output: {response.content!r}")
-                return response.content
+                idea = response.content
+                if idea.source_url and idea.source_url.startswith(_GITHUB_PREFIX):
+                    if not await _verify_url(idea.source_url):
+                        logger.warning(f"GitHub URL not found, clearing: {idea.source_url}")
+                        idea.source_url = None
+                return idea
             except Exception as e:
                 last_exc = e
                 if attempt < _MAX_RETRIES - 1:

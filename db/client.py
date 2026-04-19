@@ -61,6 +61,7 @@ class SupabaseClient:
             await self._db.table("ideas")
             .update(update_data)
             .like("id", f"{short_id}%")
+            .select("*")
             .execute()
         )
         return Idea(**res2.data[0])

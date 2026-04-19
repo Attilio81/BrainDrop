@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from firecrawl.v1 import V1FirecrawlApp
@@ -15,15 +16,20 @@ def _get_app() -> V1FirecrawlApp:
     return _app
 
 
-def scrape_url(url: str) -> str:
-    """
-    Scrape the full text content of a URL using Firecrawl.
-    Returns markdown content, or empty string on failure.
-    Called by the Agno agent as a tool (sync, runs in thread pool).
-    """
+def _scrape_url_sync(url: str) -> str:
     try:
         result = _get_app().scrape_url(url, formats=["markdown"])
         return result.markdown or ""
     except Exception as e:
         logger.warning(f"Firecrawl scraping failed for {url}: {e}")
         return ""
+
+
+async def scrape_url(url: str) -> str:
+    """
+    Scrape the full text content of a URL using Firecrawl.
+    Returns markdown content, or empty string on failure.
+    Runs the blocking Firecrawl call in a thread pool to avoid blocking the event loop.
+    """
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, _scrape_url_sync, url)
