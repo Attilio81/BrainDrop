@@ -69,9 +69,9 @@ class SupabaseClient:
         res2 = (
             await self._db.table("ideas")
             .update(update_data)
+            .select("*")
             .gte("id", lo)
             .lte("id", hi)
-            .select("*")
             .execute()
         )
         return Idea(**res2.data[0])
