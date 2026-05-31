@@ -64,7 +64,7 @@ async def _verify_url(url: str) -> bool:
 class Coordinator:
     def __init__(self) -> None:
         self._agent = Agent(
-            model=DeepSeek(id="deepseek-chat"),
+            model=DeepSeek(id="deepseek-v4-flash"),
             tools=[
                 TavilyTools(search_depth="advanced", include_answer=True),
                 YouTubeTools(languages=["it", "en", "a.it", "a.en"]),
